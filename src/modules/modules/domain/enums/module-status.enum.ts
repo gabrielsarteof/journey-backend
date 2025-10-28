@@ -1,0 +1,6 @@
+export enum ModuleStatus {
+  LOCKED = 'LOCKED',
+  AVAILABLE = 'AVAILABLE',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+}
