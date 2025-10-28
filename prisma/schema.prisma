@@ -7,6 +7,66 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Module {
+  id                 String   @id @default(cuid())
+  slug               String   @unique
+  title              String
+  description        String
+  orderIndex         Int      @unique
+
+  iconImage          String
+  theme              Json
+
+  requiredXp         Int      @default(0)
+  requiredLevel      Int      @default(1)
+
+  previousModuleId   String?
+  previousModule     Module?  @relation("ModuleSequence", fields: [previousModuleId], references: [id])
+  nextModules        Module[] @relation("ModuleSequence")
+
+  isLocked           Boolean  @default(true)
+  isNew              Boolean  @default(false)
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  challenges         Challenge[]
+  userProgress       UserModuleProgress[]
+
+  @@index([slug])
+  @@index([orderIndex])
+}
+
+model UserModuleProgress {
+  id                    String   @id @default(cuid())
+
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  moduleId              String
+  module                Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  status                ModuleStatus @default(LOCKED)
+
+  challengesCompleted   Int      @default(0)
+  totalChallenges       Int      @default(0)
+  completionPercentage  Float    @default(0)
+
+  startedAt             DateTime?
+  completedAt           DateTime?
+  lastAccessedAt        DateTime?
+
+  totalXpEarned         Int      @default(0)
+  averageScore          Float    @default(0)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([userId, moduleId])
+  @@index([userId])
+  @@index([moduleId])
+  @@index([status])
+}
 
 model User {
   id                String    @id @default(cuid())
@@ -47,7 +107,8 @@ model User {
   codeEvents       CodeEvent[]
   notifications    Notification[]
   validationLogs   ValidationLog[]
-  
+  moduleProgress   UserModuleProgress[]
+
   @@index([email])
   @@index([companyId])
 }
@@ -78,36 +139,47 @@ model Challenge {
   slug              String   @unique
   title             String
   description       String
-  
+
+  moduleId          String?
+  module            Module?   @relation(fields: [moduleId], references: [id])
+  orderInModule     Int?
+
   difficulty        Difficulty
   category          Category
   estimatedMinutes  Int
   languages         String[]
-  
-  instructions      String  
+
+  instructions      String
   starterCode       String?
   solution          String
-  
-  testCases         Json     
-  hints             Json    
-  traps             Json    
-  
+
+  testCases         Json
+  hints             Json
+  traps             Json
+
   baseXp           Int      @default(100)
   bonusXp          Int      @default(50)
-  
-  targetMetrics    Json     
-  
+
+  targetMetrics    Json
+
+  planetImage      String?
+  visualTheme      Json?
+  requiredScore    Float?
+  previousChallengeId String?
+
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-  
+
   attempts         ChallengeAttempt[]
   validationLogs       ValidationLog[]
   validationRules      ValidationRule[]
   governanceMetrics    GovernanceMetrics[]
-  
+
+  @@unique([moduleId, orderInModule])
   @@index([slug])
   @@index([difficulty])
   @@index([category])
+  @@index([moduleId])
 }
 
 model ChallengeAttempt {
@@ -582,4 +654,11 @@ enum NotificationPriority {
   low
   medium
   high
+}
+
+enum ModuleStatus {
+  LOCKED
+  AVAILABLE
+  IN_PROGRESS
+  COMPLETED
 }
