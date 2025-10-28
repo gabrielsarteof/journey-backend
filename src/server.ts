@@ -17,6 +17,7 @@ import websocketPlugin from './shared/infrastructure/websocket/websocket.plugin'
 import metricPlugin from './modules/metrics/infrastructure/plugin/metric.plugin';
 import gamificationPlugin from './modules/gamification/infrastructure/plugin/gamification.plugin';
 import aiPlugin from './modules/ai/infrastructure/plugin/ai.plugin';
+import modulePlugin from './modules/modules/infrastructure/plugin/module.plugin';
 
 // Conexão com o banco e logs mais detalhados em dev
 const prisma = new PrismaClient({
@@ -90,6 +91,7 @@ const buildApp = async () => {
     await api.register(challengePlugin, { prisma, redis });
     await api.register(metricPlugin, { prisma, redis, wsServer: app.ws });
     await api.register(gamificationPlugin, { prisma, redis, wsServer: app.ws });
+    await api.register(modulePlugin, { prisma });
   }, { prefix: '/api' });
 
   // Endpoint simples pra saber se o servidor tá de pé

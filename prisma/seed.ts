@@ -17,6 +17,8 @@ async function main() {
   await prisma.userMetrics.deleteMany();
   await prisma.badge.deleteMany();
   await prisma.challenge.deleteMany();
+  await prisma.userModuleProgress.deleteMany();
+  await prisma.module.deleteMany();
   await prisma.user.deleteMany();
   await prisma.team.deleteMany();
   await prisma.billing.deleteMany();
@@ -171,412 +173,811 @@ const aiMaster = await prisma.badge.create({
   },
 });
 
-// CHALLENGES
-const apiChallenge = await prisma.challenge.create({
+// MODULES
+const backendModule = await prisma.module.create({
   data: {
-    slug: 'todo-api-rest',
-    title: 'Construa uma API REST para Lista de Tarefas',
-    description: 'Crie uma API REST completa com operações CRUD para uma aplicação de lista de tarefas com autenticação',
+    slug: 'backend',
+    title: 'Núcleo da Nebulosa',
+    description: 'Fundamentos Backend',
+    orderIndex: 1,
+    iconImage: 'backend.png',
+    theme: {
+      color: '#8b5cf6',
+      gradient: ['#8b5cf6', '#7c3aed'],
+    },
+    requiredXp: 0,
+    requiredLevel: 1,
+    isLocked: false,
+    isNew: false,
+  },
+});
+
+const frontendModule = await prisma.module.create({
+  data: {
+    slug: 'frontend',
+    title: 'Cosmos da Interface',
+    description: 'Interfaces e Experiência',
+    orderIndex: 2,
+    iconImage: 'frontend.png',
+    theme: {
+      color: '#06b6d4',
+      gradient: ['#06b6d4', '#0891b2'],
+    },
+    requiredXp: 500,
+    requiredLevel: 2,
+    previousModuleId: backendModule.id,
+    isLocked: true,
+    isNew: false,
+  },
+});
+
+const devopsModule = await prisma.module.create({
+  data: {
+    slug: 'devops',
+    title: 'Sistema DevOps',
+    description: 'Infraestrutura e CI/CD',
+    orderIndex: 3,
+    iconImage: 'devops.png',
+    theme: {
+      color: '#10b981',
+      gradient: ['#10b981', '#059669'],
+    },
+    requiredXp: 1500,
+    requiredLevel: 4,
+    previousModuleId: frontendModule.id,
+    isLocked: true,
+    isNew: false,
+  },
+});
+
+const mobileModule = await prisma.module.create({
+  data: {
+    slug: 'mobile',
+    title: 'Aglomerado Móvel',
+    description: 'Aplicações Móveis',
+    orderIndex: 4,
+    iconImage: 'mobile.png',
+    theme: {
+      color: '#ec4899',
+      gradient: ['#ec4899', '#db2777'],
+    },
+    requiredXp: 3000,
+    requiredLevel: 6,
+    previousModuleId: devopsModule.id,
+    isLocked: true,
+    isNew: false,
+  },
+});
+
+const dataModule = await prisma.module.create({
+  data: {
+    slug: 'data',
+    title: 'Galáxia dos Dados',
+    description: 'Análise e Processamento',
+    orderIndex: 5,
+    iconImage: 'data.png',
+    theme: {
+      color: '#3b82f6',
+      gradient: ['#3b82f6', '#2563eb'],
+    },
+    requiredXp: 5000,
+    requiredLevel: 8,
+    previousModuleId: mobileModule.id,
+    isLocked: true,
+    isNew: true,
+  },
+});
+
+console.log('✅ Modules created');
+
+// CHALLENGES - Backend Module (Núcleo da Nebulosa)
+const challenge1 = await prisma.challenge.create({
+  data: {
+    slug: 'fundamentos-rest',
+    title: 'Fundamentos REST',
+    description: 'Aprenda os fundamentos da arquitetura REST',
+    moduleId: backendModule.id,
+    orderInModule: 1,
+    difficulty: 'EASY',
+    category: 'BACKEND',
+    estimatedMinutes: 30,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'mercury.png',
+    visualTheme: { color: '#E8927C' },
+    instructions: 'Aprenda os conceitos básicos de REST API',
+    starterCode: '// Código inicial',
+    solution: '// Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 50,
+    bonusXp: 25,
+    targetMetrics: { maxDI: 50, minPR: 60, minCS: 7 },
+  },
+});
+
+const challenge2 = await prisma.challenge.create({
+  data: {
+    slug: 'criar-endpoint-get',
+    title: 'Criar Endpoint GET',
+    description: 'Crie seu primeiro endpoint GET',
+    moduleId: backendModule.id,
+    orderInModule: 2,
+    difficulty: 'EASY',
+    category: 'BACKEND',
+    estimatedMinutes: 45,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Implemente um endpoint GET funcional',
+    starterCode: '// Código inicial',
+    solution: '// Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 75,
+    bonusXp: 35,
+    targetMetrics: { maxDI: 50, minPR: 60, minCS: 7 },
+  },
+});
+
+const challenge3 = await prisma.challenge.create({
+  data: {
+    slug: 'debug-rota-quebrada',
+    title: 'Debug: Rota Quebrada',
+    description: 'Encontre e corrija o bug na rota',
+    moduleId: backendModule.id,
+    orderInModule: 3,
     difficulty: 'MEDIUM',
     category: 'BACKEND',
     estimatedMinutes: 60,
-    languages: ['javascript', 'typescript', 'python'],
-    instructions: `
-# Desafio: API REST Lista de Tarefas
-
-## Objetivo
-Construir uma API RESTful para uma aplicação de lista de tarefas com os seguintes requisitos:
-
-## Requisitos
-1. **Autenticação**
-  - Registro de usuário com email/senha
-  - Login com token JWT
-  - Rotas protegidas
-
-2. **Operações CRUD de Tarefas**
-  - Criar uma nova tarefa
-  - Listar todas as tarefas (com paginação)
-  - Obter uma tarefa específica por ID
-  - Atualizar uma tarefa
-  - Excluir uma tarefa
-  - Marcar tarefa como completa/incompleta
-
-3. **Validação de Dados**
-  - Validar todas as entradas
-  - Retornar mensagens de erro apropriadas
-  - Tratar casos extremos
-
-4. **Segurança**
-  - Hash das senhas adequadamente
-  - Prevenir injeção SQL
-  - Limitação de taxa
-  - Configuração CORS
-
-## Endpoints
-- POST /auth/register
-- POST /auth/login
-- GET /todos (paginado, filtrado)
-- GET /todos/:id
-- POST /todos
-- PUT /todos/:id
-- DELETE /todos/:id
-- PATCH /todos/:id/toggle
-
-## Critérios de Avaliação
-- Organização e estrutura do código
-- Práticas de segurança
-- Tratamento de erros
-- Padrões de design de API
-- Cobertura de testes
-    `,
-    starterCode: `// Starter Express.js
-const express = require('express');
-const app = express();
-
-app.use(express.json());
-
-// TODO: Implementar middleware de autenticação
-
-// TODO: Implementar rotas
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(\`Servidor rodando na porta \${PORT}\`);
-});`,
-    solution: '// Solução completa oculta',
-    testCases: [
-      {
-        id: 'test-1',
-        input: 'POST /auth/register com dados válidos',
-        expectedOutput: '201 Created com objeto do usuário',
-        weight: 0.15,
-        description: 'Registro de usuário deve funcionar',
-      },
-      {
-        id: 'test-2',
-        input: 'POST /auth/login com credenciais válidas',
-        expectedOutput: '200 OK com token JWT',
-        weight: 0.15,
-        description: 'Login do usuário deve retornar token',
-      },
-      {
-        id: 'test-3',
-        input: 'GET /todos sem autenticação',
-        expectedOutput: '401 Unauthorized',
-        weight: 0.1,
-        description: 'Rotas protegidas devem exigir autenticação',
-      },
-      {
-        id: 'test-4',
-        input: 'POST /todos com dados válidos e autenticação',
-        expectedOutput: '201 Created com objeto da tarefa',
-        weight: 0.2,
-        description: 'Criar tarefa deve funcionar',
-      },
-      {
-        id: 'test-5',
-        input: 'Tentativa de injeção SQL no título da tarefa',
-        expectedOutput: 'Sanitizado ou rejeitado',
-        weight: 0.2,
-        description: 'Deve prevenir injeção SQL',
-      },
-      {
-        id: 'test-6',
-        input: 'GET /todos com parâmetros de paginação',
-        expectedOutput: 'Resultados paginados',
-        weight: 0.1,
-        description: 'Paginação deve funcionar corretamente',
-      },
-      {
-        id: 'test-7',
-        input: 'DELETE /todos/:id com usuário errado',
-        expectedOutput: '403 Forbidden',
-        weight: 0.1,
-        description: 'Deve prevenir exclusão não autorizada',
-      },
-    ],
-    hints: [
-      {
-        trigger: 'after_error_auth',
-        message: 'Lembre-se de fazer hash das senhas usando bcrypt antes de armazenar',
-        cost: 10,
-      },
-      {
-        trigger: 'after_error_sql',
-        message: 'Use consultas parametrizadas ou um ORM para prevenir injeção SQL',
-        cost: 20,
-      },
-      {
-        trigger: 'after_30_minutes',
-        message: 'Considere usar middleware para verificações de autenticação',
-        cost: 15,
-      },
-    ],
-    traps: [
-      {
-        id: 'trap-sql-injection',
-        type: 'security',
-        buggedCode: "db.query(`SELECT * FROM todos WHERE user_id = '${userId}'`)",
-        correctCode: "db.query('SELECT * FROM todos WHERE user_id = ?', [userId])",
-        explanation: 'Interpolação direta de string em consultas SQL permite ataques de injeção SQL',
-        detectionPattern: '\\$\\{.*\\}.*SELECT|INSERT|UPDATE|DELETE',
-        severity: 'critical',
-      },
-      {
-        id: 'trap-plain-password',
-        type: 'security',
-        buggedCode: 'user.password = req.body.password',
-        correctCode: 'user.password = await bcrypt.hash(req.body.password, 10)',
-        explanation: 'Senhas devem ser hasheadas antes do armazenamento',
-        detectionPattern: 'password\\s*=\\s*req\\.(body|params|query)',
-        severity: 'critical',
-      },
-      {
-        id: 'trap-no-auth-check',
-        type: 'security',
-        buggedCode: 'app.delete("/todos/:id", (req, res) => { // deletar tarefa })',
-        correctCode: 'app.delete("/todos/:id", authenticate, authorize, (req, res) => { // deletar tarefa })',
-        explanation: 'Operações destrutivas devem verificar autorização do usuário',
-        detectionPattern: 'app\\.(delete|put|patch).*(?!authenticate)',
-        severity: 'high',
-      },
-    ],
-    baseXp: 150,
-    bonusXp: 75,
-    targetMetrics: {
-      maxDI: 40,
-      minPR: 70,
-      minCS: 8,
-    },
+    languages: ['javascript', 'typescript'],
+    planetImage: 'mars.png',
+    visualTheme: { color: '#E27B58' },
+    instructions: 'Debug e corrija a rota quebrada',
+    starterCode: '// Código com bug',
+    solution: '// Solução corrigida',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 100,
+    bonusXp: 50,
+    targetMetrics: { maxDI: 45, minPR: 65, minCS: 7.5 },
   },
 });
 
-const reactChallenge = await prisma.challenge.create({
+const challenge4 = await prisma.challenge.create({
   data: {
-    slug: 'react-form-validation',
-    title: 'Construa um Formulário React com Validação Avançada',
-    description: 'Crie um formulário multi-etapas com regras de validação complexas e gerenciamento de estado',
+    slug: 'refactor-controller',
+    title: 'Refactor: Controller',
+    description: 'Refatore o controller para melhor organização',
+    moduleId: backendModule.id,
+    orderInModule: 4,
+    difficulty: 'MEDIUM',
+    category: 'BACKEND',
+    estimatedMinutes: 60,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'mars.png',
+    visualTheme: { color: '#E27B58' },
+    instructions: 'Refatore o controller',
+    starterCode: '// Código inicial',
+    solution: '// Solução refatorada',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 100,
+    bonusXp: 50,
+    targetMetrics: { maxDI: 45, minPR: 65, minCS: 7.5 },
+  },
+});
+
+const challenge5 = await prisma.challenge.create({
+  data: {
+    slug: 'historia-auth-jwt',
+    title: 'História: Auth JWT',
+    description: 'Aprenda sobre autenticação JWT',
+    moduleId: backendModule.id,
+    orderInModule: 5,
+    difficulty: 'MEDIUM',
+    category: 'BACKEND',
+    estimatedMinutes: 45,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Entenda JWT e sua implementação',
+    starterCode: '// Código inicial',
+    solution: '// Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 100,
+    bonusXp: 50,
+    targetMetrics: { maxDI: 45, minPR: 65, minCS: 7.5 },
+  },
+});
+
+const challenge6 = await prisma.challenge.create({
+  data: {
+    slug: 'implementar-auth',
+    title: 'Implementar Auth',
+    description: 'Implemente autenticação completa',
+    moduleId: backendModule.id,
+    orderInModule: 6,
     difficulty: 'HARD',
-    category: 'FRONTEND',
+    category: 'BACKEND',
     estimatedMinutes: 90,
     languages: ['javascript', 'typescript'],
-    instructions: `
-# Desafio: Formulário React Multi-Etapas
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Implemente sistema de autenticação',
+    starterCode: '// Código inicial',
+    solution: '// Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 150,
+    bonusXp: 75,
+    targetMetrics: { maxDI: 40, minPR: 70, minCS: 8 },
+  },
+});
 
-## Objetivo
-Construir um formulário de registro multi-etapas com validação avançada e gerenciamento de estado.
+const challenge7 = await prisma.challenge.create({
+  data: {
+    slug: 'code-review-security',
+    title: 'Code Review: Security',
+    description: 'Revise código identificando falhas de segurança',
+    moduleId: backendModule.id,
+    orderInModule: 7,
+    difficulty: 'HARD',
+    category: 'BACKEND',
+    estimatedMinutes: 90,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Identifique e corrija problemas de segurança',
+    starterCode: '// Código para revisar',
+    solution: '// Solução segura',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 150,
+    bonusXp: 75,
+    targetMetrics: { maxDI: 40, minPR: 70, minCS: 8 },
+  },
+});
 
-## Requisitos
-1. **Navegação Multi-Etapas**
-  - Etapa 1: Informações Pessoais
-  - Etapa 2: Detalhes da Conta
-  - Etapa 3: Preferências
-  - Etapa 4: Revisar e Enviar
+const challenge8 = await prisma.challenge.create({
+  data: {
+    slug: 'revisao-final-backend',
+    title: 'Revisão Final',
+    description: 'Revisão final do módulo backend',
+    moduleId: backendModule.id,
+    orderInModule: 8,
+    difficulty: 'MEDIUM',
+    category: 'BACKEND',
+    estimatedMinutes: 60,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'moon.png',
+    visualTheme: { color: '#C0C0C0' },
+    instructions: 'Complete a revisão final',
+    starterCode: '// Código inicial',
+    solution: '// Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 100,
+    bonusXp: 50,
+    targetMetrics: { maxDI: 45, minPR: 65, minCS: 7.5 },
+  },
+});
 
-2. **Regras de Validação**
-  - Validação em tempo real
-  - Validação entre campos
-  - Validação assíncrona (disponibilidade do nome de usuário)
-  - Indicador de força da senha
+// CHALLENGES - Frontend Module (Cosmos da Interface)
+const challenge9 = await prisma.challenge.create({
+  data: {
+    slug: 'fundamentos-react',
+    title: 'Fundamentos React',
+    description: 'Aprenda os fundamentos do React',
+    moduleId: frontendModule.id,
+    orderInModule: 1,
+    difficulty: 'EASY',
+    category: 'FRONTEND',
+    estimatedMinutes: 45,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Aprenda conceitos básicos do React',
+    starterCode: '// Código inicial',
+    solution: '// Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 75,
+    bonusXp: 35,
+    targetMetrics: { maxDI: 50, minPR: 60, minCS: 7 },
+  },
+});
 
-3. **Gerenciamento de Estado**
-  - Preservar estado entre etapas
-  - Permitir navegação para frente/trás
-  - Mostrar indicador de progresso
+const challenge10 = await prisma.challenge.create({
+  data: {
+    slug: 'componentes-react',
+    title: 'Componentes',
+    description: 'Crie componentes React reutilizáveis',
+    moduleId: frontendModule.id,
+    orderInModule: 2,
+    difficulty: 'MEDIUM',
+    category: 'FRONTEND',
+    estimatedMinutes: 60,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Crie componentes reutilizáveis',
+    starterCode: '// Código inicial',
+    solution: '// Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 100,
+    bonusXp: 50,
+    targetMetrics: { maxDI: 45, minPR: 65, minCS: 7.5 },
+  },
+});
 
-4. **Recursos de UX**
-  - Estados de carregamento
-  - Mensagens de erro
-  - Feedback de sucesso
-  - Acessibilidade (labels ARIA)
+const challenge11 = await prisma.challenge.create({
+  data: {
+    slug: 'debug-ui-quebrada',
+    title: 'Debug: UI Quebrada',
+    description: 'Corrija problemas na interface',
+    moduleId: frontendModule.id,
+    orderInModule: 3,
+    difficulty: 'MEDIUM',
+    category: 'FRONTEND',
+    estimatedMinutes: 60,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Debug e corrija a UI',
+    starterCode: '// Código com bug',
+    solution: '// Solução corrigida',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 100,
+    bonusXp: 50,
+    targetMetrics: { maxDI: 45, minPR: 65, minCS: 7.5 },
+  },
+});
 
-## Avaliação
-- Arquitetura de componentes
-- Abordagem de gerenciamento de estado
-- Implementação da validação
-- Experiência do usuário
-- Reutilização de código
-    `,
-    starterCode: `import React from 'react';
+const challenge12 = await prisma.challenge.create({
+  data: {
+    slug: 'responsividade',
+    title: 'Responsividade',
+    description: 'Torne a interface responsiva',
+    moduleId: frontendModule.id,
+    orderInModule: 4,
+    difficulty: 'MEDIUM',
+    category: 'FRONTEND',
+    estimatedMinutes: 75,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Implemente responsividade',
+    starterCode: '// Código inicial',
+    solution: '// Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 100,
+    bonusXp: 50,
+    targetMetrics: { maxDI: 45, minPR: 65, minCS: 7.5 },
+  },
+});
 
-function MultiStepForm() {
-  // TODO: Implementar lógica do formulário
-  
-  return (
-    <div>
-      <h1>Formulário de Registro</h1>
-      {/* TODO: Implementar etapas do formulário */}
-    </div>
-  );
-}
+const challenge13 = await prisma.challenge.create({
+  data: {
+    slug: 'revisao-frontend',
+    title: 'Revisão Frontend',
+    description: 'Revisão final do módulo frontend',
+    moduleId: frontendModule.id,
+    orderInModule: 5,
+    difficulty: 'MEDIUM',
+    category: 'FRONTEND',
+    estimatedMinutes: 60,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'moon.png',
+    visualTheme: { color: '#C0C0C0' },
+    instructions: 'Complete a revisão final',
+    starterCode: '// Código inicial',
+    solution: '// Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 100,
+    bonusXp: 50,
+    targetMetrics: { maxDI: 45, minPR: 65, minCS: 7.5 },
+  },
+});
 
-export default MultiStepForm;`,
-    solution: '// Solução completa oculta',
-    testCases: [
-      {
-        id: 'test-1',
-        input: 'Navegar por todas as etapas',
-        expectedOutput: 'Estado preservado corretamente',
-        weight: 0.2,
-      },
-      {
-        id: 'test-2',
-        input: 'Enviar email inválido',
-        expectedOutput: 'Mostrar erro de validação',
-        weight: 0.15,
-      },
-      {
-        id: 'test-3',
-        input: 'Senhas não coincidem',
-        expectedOutput: 'Erro de validação entre campos',
-        weight: 0.15,
-      },
-      {
-        id: 'test-4',
-        input: 'Verificar nome de usuário duplicado',
-        expectedOutput: 'Validação assíncrona funciona',
-        weight: 0.2,
-      },
-      {
-        id: 'test-5',
-        input: 'Enviar formulário válido',
-        expectedOutput: 'Mensagem de sucesso e dados enviados',
-        weight: 0.3,
-      },
-    ],
-    hints: [
-      {
-        trigger: 'after_error_state',
-        message: 'Considere usar useReducer para gerenciamento complexo de estado',
-        cost: 15,
-      },
-      {
-        trigger: 'after_error_validation',
-        message: 'Você pode usar bibliotecas como Yup ou Zod para esquemas de validação',
-        cost: 20,
-      },
-    ],
-    traps: [
-      {
-        id: 'trap-uncontrolled-inputs',
-        type: 'logic',
-        buggedCode: '<input name="email" />',
-        correctCode: '<input name="email" value={email} onChange={handleChange} />',
-        explanation: 'Inputs não controlados perdem estado em re-renderizações',
-        detectionPattern: '<input(?!.*value=)(?!.*defaultValue)',
-        severity: 'medium',
-      },
-      {
-        id: 'trap-missing-keys',
-        type: 'performance',
-        buggedCode: 'items.map(item => <div>{item.name}</div>)',
-        correctCode: 'items.map(item => <div key={item.id}>{item.name}</div>)',
-        explanation: 'Keys ausentes causam re-renderizações desnecessárias',
-        detectionPattern: '\\.map\\(.*=>.*(?!key=)',
-        severity: 'low',
-      },
-    ],
+// CHALLENGES - DevOps Module (Sistema DevOps)
+const challenge14 = await prisma.challenge.create({
+  data: {
+    slug: 'docker-basics',
+    title: 'Docker Basics',
+    description: 'Aprenda os fundamentos do Docker',
+    moduleId: devopsModule.id,
+    orderInModule: 1,
+    difficulty: 'MEDIUM',
+    category: 'DEVOPS',
+    estimatedMinutes: 60,
+    languages: ['dockerfile', 'bash'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Aprenda Docker',
+    starterCode: '# Dockerfile inicial',
+    solution: '# Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 100,
+    bonusXp: 50,
+    targetMetrics: { maxDI: 45, minPR: 65, minCS: 7.5 },
+  },
+});
+
+const challenge15 = await prisma.challenge.create({
+  data: {
+    slug: 'cicd-pipeline',
+    title: 'CI/CD Pipeline',
+    description: 'Configure uma pipeline CI/CD',
+    moduleId: devopsModule.id,
+    orderInModule: 2,
+    difficulty: 'HARD',
+    category: 'DEVOPS',
+    estimatedMinutes: 90,
+    languages: ['yaml', 'bash'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Configure CI/CD',
+    starterCode: '# Pipeline inicial',
+    solution: '# Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 150,
+    bonusXp: 75,
+    targetMetrics: { maxDI: 40, minPR: 70, minCS: 8 },
+  },
+});
+
+const challenge16 = await prisma.challenge.create({
+  data: {
+    slug: 'debug-deploy-failed',
+    title: 'Debug: Deploy Failed',
+    description: 'Corrija problemas no deploy',
+    moduleId: devopsModule.id,
+    orderInModule: 3,
+    difficulty: 'HARD',
+    category: 'DEVOPS',
+    estimatedMinutes: 90,
+    languages: ['yaml', 'bash'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Debug o deploy',
+    starterCode: '# Pipeline com bug',
+    solution: '# Solução corrigida',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 150,
+    bonusXp: 75,
+    targetMetrics: { maxDI: 40, minPR: 70, minCS: 8 },
+  },
+});
+
+const challenge17 = await prisma.challenge.create({
+  data: {
+    slug: 'kubernetes',
+    title: 'Kubernetes',
+    description: 'Aprenda orquestração com Kubernetes',
+    moduleId: devopsModule.id,
+    orderInModule: 4,
+    difficulty: 'EXPERT',
+    category: 'DEVOPS',
+    estimatedMinutes: 120,
+    languages: ['yaml'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Configure Kubernetes',
+    starterCode: '# Manifests iniciais',
+    solution: '# Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
     baseXp: 200,
     bonusXp: 100,
-    targetMetrics: {
-      maxDI: 35,
-      minPR: 75,
-      minCS: 8.5,
-    },
+    targetMetrics: { maxDI: 35, minPR: 75, minCS: 8.5 },
   },
 });
 
-const debugChallenge = await prisma.challenge.create({
+const challenge18 = await prisma.challenge.create({
   data: {
-    slug: 'debug-memory-leak',
-    title: 'Debugar e Corrigir Vazamento de Memória',
-    description: 'Identifique e corrija vazamentos de memória em uma aplicação Node.js',
-    difficulty: 'EXPERT',
-    category: 'BACKEND',
-    estimatedMinutes: 120,
-    languages: ['javascript', 'typescript'],
-    instructions: `
-# Desafio: Debug de Vazamento de Memória
-
-## Cenário
-Você herdou uma aplicação Node.js que está sofrendo vazamentos de memória em produção.
-A aplicação trava a cada poucas horas devido a erros de falta de memória.
-
-## Sua Tarefa
-1. Identificar a fonte dos vazamentos de memória
-2. Corrigir os problemas
-3. Implementar monitoramento
-4. Adicionar testes para prevenir regressão
-
-## A Aplicação
-Um serviço de análise em tempo real que:
-- Processa eventos de entrada
-- Mantém conexões WebSocket
-- Faz cache de dados processados
-- Gera relatórios
-
-## Ferramentas Disponíveis
-- Profiler de heap do Node.js
-- Chrome DevTools
-- Utilitários de monitoramento de processos
-
-## Critérios de Sucesso
-- Uso de memória estável ao longo do tempo
-- Sem crescimento do tamanho do heap
-- Todas as conexões fechadas adequadamente
-- Recursos liberados apropriadamente
-    `,
-    starterCode: '// Código com bugs e vazamentos de memória fornecido',
-    solution: '// Solução corrigida oculta',
-    testCases: [
-      {
-        id: 'test-1',
-        input: 'Executar por 10 minutos com carga',
-        expectedOutput: 'Uso de memória estável',
-        weight: 0.4,
-      },
-      {
-        id: 'test-2',
-        input: 'Abrir e fechar 1000 conexões',
-        expectedOutput: 'Todos os recursos liberados',
-        weight: 0.3,
-      },
-      {
-        id: 'test-3',
-        input: 'Processar 100k eventos',
-        expectedOutput: 'Sem crescimento de memória',
-        weight: 0.3,
-      },
-    ],
-    hints: [
-      {
-        trigger: 'after_60_minutes',
-        message: 'Verifique vazamentos de event listeners e referências circulares',
-        cost: 30,
-      },
-    ],
-    traps: [
-      {
-        id: 'trap-event-listeners',
-        type: 'performance',
-        buggedCode: 'emitter.on("data", handler)',
-        correctCode: 'emitter.once("data", handler) // ou remover listener',
-        explanation: 'Event listeners não removidos causam vazamentos de memória',
-        detectionPattern: '\\.on\\((?!.*\\.off|\\.removeListener)',
-        severity: 'high',
-      },
-    ],
-    baseXp: 500,
-    bonusXp: 250,
-    targetMetrics: {
-      maxDI: 30,
-      minPR: 80,
-      minCS: 9,
-    },
+    slug: 'revisao-devops',
+    title: 'Revisão DevOps',
+    description: 'Revisão final do módulo DevOps',
+    moduleId: devopsModule.id,
+    orderInModule: 5,
+    difficulty: 'HARD',
+    category: 'DEVOPS',
+    estimatedMinutes: 90,
+    languages: ['yaml', 'bash'],
+    planetImage: 'moon.png',
+    visualTheme: { color: '#C0C0C0' },
+    instructions: 'Complete a revisão final',
+    starterCode: '# Código inicial',
+    solution: '# Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 150,
+    bonusXp: 75,
+    targetMetrics: { maxDI: 40, minPR: 70, minCS: 8 },
   },
 });
 
-//  USER METRICS
+// CHALLENGES - Mobile Module (Aglomerado Móvel)
+const challenge19 = await prisma.challenge.create({
+  data: {
+    slug: 'react-native-intro',
+    title: 'React Native Intro',
+    description: 'Introdução ao React Native',
+    moduleId: mobileModule.id,
+    orderInModule: 1,
+    difficulty: 'MEDIUM',
+    category: 'MOBILE',
+    estimatedMinutes: 60,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Aprenda React Native',
+    starterCode: '// Código inicial',
+    solution: '// Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 100,
+    bonusXp: 50,
+    targetMetrics: { maxDI: 45, minPR: 65, minCS: 7.5 },
+  },
+});
+
+const challenge20 = await prisma.challenge.create({
+  data: {
+    slug: 'navegacao-mobile',
+    title: 'Navegação Mobile',
+    description: 'Implemente navegação mobile',
+    moduleId: mobileModule.id,
+    orderInModule: 2,
+    difficulty: 'MEDIUM',
+    category: 'MOBILE',
+    estimatedMinutes: 75,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Configure navegação',
+    starterCode: '// Código inicial',
+    solution: '// Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 100,
+    bonusXp: 50,
+    targetMetrics: { maxDI: 45, minPR: 65, minCS: 7.5 },
+  },
+});
+
+const challenge21 = await prisma.challenge.create({
+  data: {
+    slug: 'debug-performance',
+    title: 'Debug: Performance',
+    description: 'Otimize performance do app',
+    moduleId: mobileModule.id,
+    orderInModule: 3,
+    difficulty: 'HARD',
+    category: 'MOBILE',
+    estimatedMinutes: 90,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Melhore a performance',
+    starterCode: '// Código com problemas',
+    solution: '// Solução otimizada',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 150,
+    bonusXp: 75,
+    targetMetrics: { maxDI: 40, minPR: 70, minCS: 8 },
+  },
+});
+
+const challenge22 = await prisma.challenge.create({
+  data: {
+    slug: 'refactor-components-mobile',
+    title: 'Refactor: Components',
+    description: 'Refatore componentes mobile',
+    moduleId: mobileModule.id,
+    orderInModule: 4,
+    difficulty: 'HARD',
+    category: 'MOBILE',
+    estimatedMinutes: 90,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Refatore os componentes',
+    starterCode: '// Código inicial',
+    solution: '// Solução refatorada',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 150,
+    bonusXp: 75,
+    targetMetrics: { maxDI: 40, minPR: 70, minCS: 8 },
+  },
+});
+
+const challenge23 = await prisma.challenge.create({
+  data: {
+    slug: 'revisao-mobile',
+    title: 'Revisão Mobile',
+    description: 'Revisão final do módulo mobile',
+    moduleId: mobileModule.id,
+    orderInModule: 5,
+    difficulty: 'HARD',
+    category: 'MOBILE',
+    estimatedMinutes: 90,
+    languages: ['javascript', 'typescript'],
+    planetImage: 'moon.png',
+    visualTheme: { color: '#C0C0C0' },
+    instructions: 'Complete a revisão final',
+    starterCode: '// Código inicial',
+    solution: '// Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 150,
+    bonusXp: 75,
+    targetMetrics: { maxDI: 40, minPR: 70, minCS: 8 },
+  },
+});
+
+// CHALLENGES - Data Module (Galáxia dos Dados)
+const challenge24 = await prisma.challenge.create({
+  data: {
+    slug: 'sql-avancado',
+    title: 'SQL Avançado',
+    description: 'Aprenda SQL avançado',
+    moduleId: dataModule.id,
+    orderInModule: 1,
+    difficulty: 'HARD',
+    category: 'DATA',
+    estimatedMinutes: 90,
+    languages: ['sql'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Domine SQL avançado',
+    starterCode: '-- Query inicial',
+    solution: '-- Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 150,
+    bonusXp: 75,
+    targetMetrics: { maxDI: 40, minPR: 70, minCS: 8 },
+  },
+});
+
+const challenge25 = await prisma.challenge.create({
+  data: {
+    slug: 'etl-pipeline',
+    title: 'ETL Pipeline',
+    description: 'Construa uma pipeline ETL',
+    moduleId: dataModule.id,
+    orderInModule: 2,
+    difficulty: 'EXPERT',
+    category: 'DATA',
+    estimatedMinutes: 120,
+    languages: ['python', 'sql'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Implemente ETL',
+    starterCode: '# Pipeline inicial',
+    solution: '# Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 200,
+    bonusXp: 100,
+    targetMetrics: { maxDI: 35, minPR: 75, minCS: 8.5 },
+  },
+});
+
+const challenge26 = await prisma.challenge.create({
+  data: {
+    slug: 'debug-query-slow',
+    title: 'Debug: Query Slow',
+    description: 'Otimize queries lentas',
+    moduleId: dataModule.id,
+    orderInModule: 3,
+    difficulty: 'EXPERT',
+    category: 'DATA',
+    estimatedMinutes: 120,
+    languages: ['sql'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Otimize as queries',
+    starterCode: '-- Query lenta',
+    solution: '-- Query otimizada',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 200,
+    bonusXp: 100,
+    targetMetrics: { maxDI: 35, minPR: 75, minCS: 8.5 },
+  },
+});
+
+const challenge27 = await prisma.challenge.create({
+  data: {
+    slug: 'data-warehouse',
+    title: 'Data Warehouse',
+    description: 'Implemente um Data Warehouse',
+    moduleId: dataModule.id,
+    orderInModule: 4,
+    difficulty: 'EXPERT',
+    category: 'DATA',
+    estimatedMinutes: 150,
+    languages: ['sql', 'python'],
+    planetImage: 'unknown.png',
+    visualTheme: { color: '#A0A0A0' },
+    instructions: 'Configure Data Warehouse',
+    starterCode: '# Código inicial',
+    solution: '# Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 250,
+    bonusXp: 125,
+    targetMetrics: { maxDI: 30, minPR: 80, minCS: 9 },
+  },
+});
+
+const challenge28 = await prisma.challenge.create({
+  data: {
+    slug: 'revisao-data',
+    title: 'Revisão Data',
+    description: 'Revisão final do módulo de dados',
+    moduleId: dataModule.id,
+    orderInModule: 5,
+    difficulty: 'EXPERT',
+    category: 'DATA',
+    estimatedMinutes: 120,
+    languages: ['sql', 'python'],
+    planetImage: 'moon.png',
+    visualTheme: { color: '#C0C0C0' },
+    instructions: 'Complete a revisão final',
+    starterCode: '# Código inicial',
+    solution: '# Solução',
+    testCases: [],
+    hints: [],
+    traps: [],
+    baseXp: 200,
+    bonusXp: 100,
+    targetMetrics: { maxDI: 35, minPR: 75, minCS: 8.5 },
+  },
+});
+
+console.log('✅ Challenges created (28 total)');
+
+//  USER METRICS - Update to use challenge1 instead of apiChallenge
 await prisma.userMetrics.create({
   data: {
     userId: gabriel.id,
@@ -601,11 +1002,11 @@ await prisma.userMetrics.create({
   },
 });
 
-// HALLENGE ATTEMPT
+// CHALLENGE ATTEMPT - Use challenge1 instead of apiChallenge
 const attempt = await prisma.challengeAttempt.create({
   data: {
     userId: gabriel.id,
-    challengeId: apiChallenge.id,
+    challengeId: challenge1.id,
     sessionId: crypto.randomUUID(),
     attemptNumber: 1,
     status: 'COMPLETED',
@@ -634,9 +1035,11 @@ console.log('✅ Seed completed successfully!');
 console.log({
   empresas: 2,
   usuários: 4,
+  módulos: 5,
   badges: 3,
-  desafios: 3,
+  desafios: 28, // Updated count
   tentativas: 1,
+  métricas: 1,
 });
 }
 
