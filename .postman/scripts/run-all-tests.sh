@@ -161,6 +161,12 @@ run_collection \
     "ai"
 TOTAL_TESTS=$((TOTAL_TESTS + 1))
 
+run_collection \
+    "Modules System" \
+    "${COLLECTIONS_DIR}/modules-collection.json" \
+    "modules"
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+
 # Generate summary
 echo ""
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════════╗${NC}"
