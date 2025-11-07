@@ -1077,7 +1077,367 @@ await prisma.levelChallenge.create({
   },
 });
 
-console.log('✅ Units and Levels created (1 unit, 1 level)');
+console.log('✅ First sample unit and level created');
+
+// ============================================================================
+// COMPLETE MIGRATION: All Units and Levels for all modules
+// ============================================================================
+
+console.log('\n📦 Creating complete learning hierarchy...\n');
+
+// Helper function to get challenges by module
+const getChallengesByModule = (moduleId: string) => {
+  return [
+    challenge1, challenge2, challenge3, challenge4, challenge5, challenge6, challenge7, challenge8,
+    challenge9, challenge10, challenge11, challenge12, challenge13,
+    challenge14, challenge15, challenge16, challenge17, challenge18,
+    challenge19, challenge20, challenge21, challenge22, challenge23,
+    challenge24, challenge25, challenge26, challenge27, challenge28
+  ].filter((c: any) => c.moduleId === moduleId).sort((a: any, b: any) => a.orderInModule - b.orderInModule);
+};
+
+const backendChallenges = getChallengesByModule(backendModule.id);
+const frontendChallenges = getChallengesByModule(frontendModule.id);
+const devopsChallenges = getChallengesByModule(devopsModule.id);
+const mobileChallenges = getChallengesByModule(mobileModule.id);
+const dataChallenges = getChallengesByModule(dataModule.id);
+
+// BACKEND UNITS (2 more needed, already have 1)
+console.log('🏗️  Backend Module: Creating additional units...');
+
+const backendUnit2 = await prisma.unit.create({
+  data: {
+    slug: 'rest-api-fundamentals',
+    title: 'REST API Fundamentals',
+    description: 'Master RESTful architecture and build robust APIs',
+    moduleId: backendModule.id,
+    orderInModule: 2,
+    iconImage: 'rest-api.png',
+    theme: { color: '#8b5cf6', gradient: ['#8b5cf6', '#7c3aed'], icon: '🌐' },
+    learningObjectives: [
+      'Understand REST principles and constraints',
+      'Design resource-oriented APIs',
+      'Implement proper HTTP methods and status codes',
+      'Debug common API issues',
+    ],
+    estimatedMinutes: 135,
+    theoryContent: '# REST API Fundamentals\n\nLearn the core concepts of RESTful architecture...',
+    resources: { articles: [], videos: [] },
+    requiredScore: 70,
+  },
+});
+
+const backendUnit3 = await prisma.unit.create({
+  data: {
+    slug: 'architecture-refactoring',
+    title: 'Architecture & Refactoring',
+    description: 'Learn clean code and authentication patterns',
+    moduleId: backendModule.id,
+    orderInModule: 3,
+    iconImage: 'architecture.png',
+    theme: { color: '#7c3aed', gradient: ['#7c3aed', '#6d28d9'], icon: '🏗️' },
+    learningObjectives: [
+      'Apply SOLID principles',
+      'Refactor legacy code',
+      'Implement JWT authentication',
+    ],
+    estimatedMinutes: 195,
+    theoryContent: '# Architecture & Refactoring\n\nClean code principles...',
+    resources: { articles: [], videos: [] },
+    requiredScore: 75,
+  },
+});
+
+const backendUnit4 = await prisma.unit.create({
+  data: {
+    slug: 'security-best-practices',
+    title: 'Security & Best Practices',
+    description: 'Master security and defensive programming',
+    moduleId: backendModule.id,
+    orderInModule: 4,
+    iconImage: 'security.png',
+    theme: { color: '#6d28d9', gradient: ['#6d28d9', '#5b21b6'], icon: '🛡️' },
+    learningObjectives: [
+      'Identify OWASP Top 10 vulnerabilities',
+      'Conduct security code reviews',
+      'Apply defensive programming',
+    ],
+    estimatedMinutes: 150,
+    theoryContent: '# Security & Best Practices\n\nOWASP Top 10...',
+    resources: { articles: [], videos: [] },
+    requiredScore: 80,
+  },
+});
+
+console.log(`  ✅ Created 3 additional Backend units`);
+
+// BACKEND LEVELS
+console.log('🎮 Creating Backend levels...');
+
+const backendLevels = await Promise.all([
+  // Unit 2 levels
+  prisma.level.create({ data: { unitId: backendUnit2.id, orderInUnit: 0, type: 'LESSON', icon: '📚', title: 'REST Basics', config: {}, bonusXp: 25 }}),
+  prisma.level.create({ data: { unitId: backendUnit2.id, orderInUnit: 1, type: 'PRACTICE', icon: '⚡', title: 'Build GET Endpoint', config: {}, bonusXp: 35 }}),
+  prisma.level.create({ data: { unitId: backendUnit2.id, orderInUnit: 2, type: 'PRACTICE', icon: '🐛', title: 'Debug Route', config: {}, bonusXp: 50, adaptive: true }}),
+  // Unit 3 levels
+  prisma.level.create({ data: { unitId: backendUnit3.id, orderInUnit: 0, type: 'LESSON', icon: '🔧', title: 'Refactoring Tutorial', config: {}, bonusXp: 50 }}),
+  prisma.level.create({ data: { unitId: backendUnit3.id, orderInUnit: 1, type: 'STORY', icon: '📖', title: 'Auth Story', config: {}, bonusXp: 100, optional: true, blocking: false }}),
+  prisma.level.create({ data: { unitId: backendUnit3.id, orderInUnit: 2, type: 'PRACTICE', icon: '🔐', title: 'Implement Auth', config: {}, bonusXp: 75, adaptive: true }}),
+  // Unit 4 levels
+  prisma.level.create({ data: { unitId: backendUnit4.id, orderInUnit: 0, type: 'PRACTICE', icon: '🛡️', title: 'Security Review', config: {}, bonusXp: 75 }}),
+  prisma.level.create({ data: { unitId: backendUnit4.id, orderInUnit: 1, type: 'UNIT_REVIEW', icon: '🎯', title: 'Backend Review', config: {}, bonusXp: 200, timeLimit: 3600 }}),
+  prisma.level.create({ data: { unitId: backendUnit4.id, orderInUnit: 2, type: 'XP_RAMP_UP', icon: '⭐', title: 'XP Bonus', config: {}, bonusXp: 500, optional: true, blocking: false }}),
+]);
+
+// Connect Backend challenges (skip first one already connected)
+await prisma.levelChallenge.createMany({
+  data: [
+    { levelId: backendLevels[0].id, challengeId: backendChallenges[1].id, orderInLevel: 1, required: true },
+    { levelId: backendLevels[1].id, challengeId: backendChallenges[2].id, orderInLevel: 1, required: true },
+    { levelId: backendLevels[2].id, challengeId: backendChallenges[3].id, orderInLevel: 1, required: true },
+    { levelId: backendLevels[3].id, challengeId: backendChallenges[4].id, orderInLevel: 1, required: true },
+    { levelId: backendLevels[4].id, challengeId: backendChallenges[5].id, orderInLevel: 1, required: true },
+    { levelId: backendLevels[5].id, challengeId: backendChallenges[6].id, orderInLevel: 1, required: true },
+    { levelId: backendLevels[6].id, challengeId: backendChallenges[7].id, orderInLevel: 1, required: true },
+  ],
+});
+
+console.log(`  ✅ Created 9 Backend levels and connected 7 more challenges`);
+
+// FRONTEND UNITS & LEVELS
+console.log('🏗️  Frontend Module: Creating units and levels...');
+
+const frontendUnit1 = await prisma.unit.create({
+  data: {
+    slug: 'react-fundamentals',
+    title: 'React Fundamentals',
+    description: 'Master React core concepts',
+    moduleId: frontendModule.id,
+    orderInModule: 1,
+    iconImage: 'react.png',
+    theme: { color: '#61dafb', gradient: ['#61dafb', '#21a1c4'], icon: '⚛️' },
+    learningObjectives: ['Understand React lifecycle', 'Build reusable components', 'Manage state effectively'],
+    estimatedMinutes: 165,
+    theoryContent: '# React Fundamentals\n\nCore concepts...',
+    resources: { articles: [], videos: [] },
+    requiredScore: 70,
+  },
+});
+
+const frontendUnit2 = await prisma.unit.create({
+  data: {
+    slug: 'ui-ux-advanced',
+    title: 'UI/UX Advanced',
+    description: 'Responsive design and accessibility',
+    moduleId: frontendModule.id,
+    orderInModule: 2,
+    iconImage: 'ui-ux.png',
+    theme: { color: '#0891b2', gradient: ['#0891b2', '#0e7490'], icon: '🎨' },
+    learningObjectives: ['Build responsive layouts', 'Implement accessibility', 'Master CSS-in-JS'],
+    estimatedMinutes: 120,
+    theoryContent: '# UI/UX Advanced\n\nResponsive design...',
+    resources: { articles: [], videos: [] },
+    requiredScore: 75,
+  },
+});
+
+const frontendLevels = await Promise.all([
+  prisma.level.create({ data: { unitId: frontendUnit1.id, orderInUnit: 0, type: 'LESSON', icon: '📚', title: 'React Basics', config: {}, bonusXp: 35 }}),
+  prisma.level.create({ data: { unitId: frontendUnit1.id, orderInUnit: 1, type: 'PRACTICE', icon: '⚛️', title: 'Components', config: {}, bonusXp: 50 }}),
+  prisma.level.create({ data: { unitId: frontendUnit1.id, orderInUnit: 2, type: 'PRACTICE', icon: '🐛', title: 'Debug UI', config: {}, bonusXp: 50, adaptive: true }}),
+  prisma.level.create({ data: { unitId: frontendUnit2.id, orderInUnit: 0, type: 'PRACTICE', icon: '📱', title: 'Responsive', config: {}, bonusXp: 50 }}),
+  prisma.level.create({ data: { unitId: frontendUnit2.id, orderInUnit: 1, type: 'UNIT_REVIEW', icon: '🎯', title: 'Frontend Review', config: {}, bonusXp: 200 }}),
+  prisma.level.create({ data: { unitId: frontendUnit2.id, orderInUnit: 2, type: 'MATCH_MADNESS', icon: '🎮', title: 'CSS Match', config: {}, bonusXp: 150, optional: true, blocking: false, timeLimit: 120 }}),
+]);
+
+await prisma.levelChallenge.createMany({
+  data: frontendChallenges.map((ch, idx) => ({
+    levelId: frontendLevels[idx]?.id,
+    challengeId: ch.id,
+    orderInLevel: 1,
+    required: true,
+  })).filter(c => c.levelId),
+});
+
+console.log(`  ✅ Created 2 Frontend units, 6 levels, connected 5 challenges`);
+
+// DEVOPS UNITS & LEVELS
+console.log('🏗️  DevOps Module: Creating units and levels...');
+
+const devopsUnit1 = await prisma.unit.create({
+  data: {
+    slug: 'containerization-cicd',
+    title: 'Containerization & CI/CD',
+    description: 'Docker and deployment pipelines',
+    moduleId: devopsModule.id,
+    orderInModule: 1,
+    iconImage: 'docker.png',
+    theme: { color: '#10b981', gradient: ['#10b981', '#059669'], icon: '🐳' },
+    learningObjectives: ['Master Docker', 'Build CI/CD pipelines', 'Debug deployments'],
+    estimatedMinutes: 210,
+    theoryContent: '# Containerization\n\nDocker fundamentals...',
+    resources: { articles: [], videos: [] },
+    requiredScore: 70,
+  },
+});
+
+const devopsUnit2 = await prisma.unit.create({
+  data: {
+    slug: 'advanced-orchestration',
+    title: 'Advanced Orchestration',
+    description: 'Kubernetes and scaling',
+    moduleId: devopsModule.id,
+    orderInModule: 2,
+    iconImage: 'kubernetes.png',
+    theme: { color: '#059669', gradient: ['#059669', '#047857'], icon: '☸️' },
+    learningObjectives: ['Understand K8s', 'Deploy apps', 'Troubleshoot production'],
+    estimatedMinutes: 240,
+    theoryContent: '# Kubernetes\n\nOrchestration...',
+    resources: { articles: [], videos: [] },
+    requiredScore: 80,
+  },
+});
+
+const devopsLevels = await Promise.all([
+  prisma.level.create({ data: { unitId: devopsUnit1.id, orderInUnit: 0, type: 'LESSON', icon: '🐳', title: 'Docker Basics', config: {}, bonusXp: 50 }}),
+  prisma.level.create({ data: { unitId: devopsUnit1.id, orderInUnit: 1, type: 'PRACTICE', icon: '🔄', title: 'CI/CD Pipeline', config: {}, bonusXp: 75, adaptive: true }}),
+  prisma.level.create({ data: { unitId: devopsUnit1.id, orderInUnit: 2, type: 'PRACTICE', icon: '🐛', title: 'Debug Deploy', config: {}, bonusXp: 75, adaptive: true }}),
+  prisma.level.create({ data: { unitId: devopsUnit2.id, orderInUnit: 0, type: 'PRACTICE', icon: '☸️', title: 'Kubernetes', config: {}, bonusXp: 100, adaptive: true }}),
+  prisma.level.create({ data: { unitId: devopsUnit2.id, orderInUnit: 1, type: 'UNIT_REVIEW', icon: '🎯', title: 'DevOps Review', config: {}, bonusXp: 200, timeLimit: 3600 }}),
+  prisma.level.create({ data: { unitId: devopsUnit2.id, orderInUnit: 2, type: 'RAPID_REVIEW', icon: '⚡', title: 'Commands Quiz', config: {}, bonusXp: 100, optional: true, blocking: false, timeLimit: 450 }}),
+]);
+
+await prisma.levelChallenge.createMany({
+  data: devopsChallenges.map((ch, idx) => ({
+    levelId: devopsLevels[idx]?.id,
+    challengeId: ch.id,
+    orderInLevel: 1,
+    required: true,
+  })).filter(c => c.levelId),
+});
+
+console.log(`  ✅ Created 2 DevOps units, 6 levels, connected 5 challenges`);
+
+// MOBILE UNITS & LEVELS
+console.log('🏗️  Mobile Module: Creating units and levels...');
+
+const mobileUnit1 = await prisma.unit.create({
+  data: {
+    slug: 'react-native-essentials',
+    title: 'React Native Essentials',
+    description: 'Build cross-platform mobile apps',
+    moduleId: mobileModule.id,
+    orderInModule: 1,
+    iconImage: 'react-native.png',
+    theme: { color: '#ec4899', gradient: ['#ec4899', '#db2777'], icon: '📱' },
+    learningObjectives: ['React Native fundamentals', 'Build native UI', 'Implement navigation'],
+    estimatedMinutes: 225,
+    theoryContent: '# React Native\n\nMobile development...',
+    resources: { articles: [], videos: [] },
+    requiredScore: 70,
+  },
+});
+
+const mobileUnit2 = await prisma.unit.create({
+  data: {
+    slug: 'performance-architecture',
+    title: 'Performance & Architecture',
+    description: 'Optimize mobile apps',
+    moduleId: mobileModule.id,
+    orderInModule: 2,
+    iconImage: 'performance.png',
+    theme: { color: '#db2777', gradient: ['#db2777', '#be185d'], icon: '⚡' },
+    learningObjectives: ['Profile performance', 'Efficient state management', 'Clean architecture'],
+    estimatedMinutes: 180,
+    theoryContent: '# Mobile Performance\n\nOptimization...',
+    resources: { articles: [], videos: [] },
+    requiredScore: 75,
+  },
+});
+
+const mobileLevels = await Promise.all([
+  prisma.level.create({ data: { unitId: mobileUnit1.id, orderInUnit: 0, type: 'LESSON', icon: '📱', title: 'RN Intro', config: {}, bonusXp: 50 }}),
+  prisma.level.create({ data: { unitId: mobileUnit1.id, orderInUnit: 1, type: 'PRACTICE', icon: '🧭', title: 'Navigation', config: {}, bonusXp: 50 }}),
+  prisma.level.create({ data: { unitId: mobileUnit1.id, orderInUnit: 2, type: 'PRACTICE', icon: '🐛', title: 'Debug Performance', config: {}, bonusXp: 75, adaptive: true }}),
+  prisma.level.create({ data: { unitId: mobileUnit2.id, orderInUnit: 0, type: 'PRACTICE', icon: '🔧', title: 'Refactor', config: {}, bonusXp: 75 }}),
+  prisma.level.create({ data: { unitId: mobileUnit2.id, orderInUnit: 1, type: 'UNIT_REVIEW', icon: '🎯', title: 'Mobile Review', config: {}, bonusXp: 200 }}),
+  prisma.level.create({ data: { unitId: mobileUnit2.id, orderInUnit: 2, type: 'XP_RAMP_UP', icon: '⭐', title: 'XP Bonus', config: {}, bonusXp: 500, optional: true, blocking: false }}),
+]);
+
+await prisma.levelChallenge.createMany({
+  data: mobileChallenges.map((ch, idx) => ({
+    levelId: mobileLevels[idx]?.id,
+    challengeId: ch.id,
+    orderInLevel: 1,
+    required: true,
+  })).filter(c => c.levelId),
+});
+
+console.log(`  ✅ Created 2 Mobile units, 6 levels, connected 5 challenges`);
+
+// DATA UNITS & LEVELS
+console.log('🏗️  Data Module: Creating units and levels...');
+
+const dataUnit1 = await prisma.unit.create({
+  data: {
+    slug: 'advanced-database',
+    title: 'Advanced Database',
+    description: 'SQL optimization and ETL',
+    moduleId: dataModule.id,
+    orderInModule: 1,
+    iconImage: 'database.png',
+    theme: { color: '#3b82f6', gradient: ['#3b82f6', '#2563eb'], icon: '📊' },
+    learningObjectives: ['Complex SQL queries', 'Query optimization', 'Design ETL pipelines'],
+    estimatedMinutes: 240,
+    theoryContent: '# Advanced Database\n\nSQL mastery...',
+    resources: { articles: [], videos: [] },
+    requiredScore: 75,
+  },
+});
+
+const dataUnit2 = await prisma.unit.create({
+  data: {
+    slug: 'data-engineering',
+    title: 'Data Engineering',
+    description: 'Data warehouses and analytics',
+    moduleId: dataModule.id,
+    orderInModule: 2,
+    iconImage: 'data-warehouse.png',
+    theme: { color: '#2563eb', gradient: ['#2563eb', '#1d4ed8'], icon: '🏢' },
+    learningObjectives: ['Design data warehouses', 'Dimensional modeling', 'Analytics pipelines'],
+    estimatedMinutes: 270,
+    theoryContent: '# Data Engineering\n\nWarehousing...',
+    resources: { articles: [], videos: [] },
+    requiredScore: 80,
+  },
+});
+
+const dataLevels = await Promise.all([
+  prisma.level.create({ data: { unitId: dataUnit1.id, orderInUnit: 0, type: 'LESSON', icon: '📚', title: 'Advanced SQL', config: {}, bonusXp: 75 }}),
+  prisma.level.create({ data: { unitId: dataUnit1.id, orderInUnit: 1, type: 'PRACTICE', icon: '🔄', title: 'ETL Pipeline', config: {}, bonusXp: 100, adaptive: true }}),
+  prisma.level.create({ data: { unitId: dataUnit1.id, orderInUnit: 2, type: 'PRACTICE', icon: '🐛', title: 'Optimize Query', config: {}, bonusXp: 100, adaptive: true }}),
+  prisma.level.create({ data: { unitId: dataUnit2.id, orderInUnit: 0, type: 'PRACTICE', icon: '🏢', title: 'Data Warehouse', config: {}, bonusXp: 125, adaptive: true }}),
+  prisma.level.create({ data: { unitId: dataUnit2.id, orderInUnit: 1, type: 'UNIT_REVIEW', icon: '🎯', title: 'Data Review', config: {}, bonusXp: 200, timeLimit: 3600 }}),
+  prisma.level.create({ data: { unitId: dataUnit2.id, orderInUnit: 2, type: 'XP_RAMP_UP', icon: '⭐', title: 'Data Master', config: {}, bonusXp: 500, optional: true, blocking: false }}),
+]);
+
+await prisma.levelChallenge.createMany({
+  data: dataChallenges.map((ch, idx) => ({
+    levelId: dataLevels[idx]?.id,
+    challengeId: ch.id,
+    orderInLevel: 1,
+    required: true,
+  })).filter(c => c.levelId),
+});
+
+console.log(`  ✅ Created 2 Data units, 6 levels, connected 5 challenges`);
+
+console.log('\n🎉 Complete learning hierarchy created!');
+console.log('📊 Summary:');
+console.log('   • 12 Units total (1 existing + 11 new)');
+console.log('   • 34 Levels total (1 existing + 33 new)');
+console.log('   • 28 Challenges all connected');
+console.log('   • 7 Level types: LESSON, PRACTICE, STORY, UNIT_REVIEW, MATCH_MADNESS, RAPID_REVIEW, XP_RAMP_UP\n');
 
 //  USER METRICS - Update to use challenge1 instead of apiChallenge
 await prisma.userMetrics.create({
@@ -1138,8 +1498,12 @@ console.log({
   empresas: 2,
   usuários: 4,
   módulos: 5,
+  units: 12,
+  levels: 34,
+  levelTypes: 7,
   badges: 3,
-  desafios: 28, // Updated count
+  desafios: 28,
+  challengesConnected: 28,
   tentativas: 1,
   métricas: 1,
 });
