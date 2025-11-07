@@ -304,4 +304,128 @@ export class AuthRepository implements IAuthRepository {
       throw error;
     }
   }
+
+  async blacklistToken(jti: string, ttl: number): Promise<void> {
+    const startTime = Date.now();
+
+    logger.info({
+      operation: 'blacklist_token',
+      jti,
+      ttlSeconds: ttl
+    }, 'Adding token to blacklist');
+
+    try {
+      const key = `bl:${jti}`;
+      await this.redis.setex(key, ttl, '1');
+
+      const processingTime = Date.now() - startTime;
+
+      logger.info({
+        operation: 'blacklist_token_success',
+        jti,
+        ttlSeconds: ttl,
+        processingTime
+      }, 'Token blacklisted successfully');
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+
+      logger.error({
+        operation: 'blacklist_token_failed',
+        jti,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        processingTime
+      }, 'Failed to blacklist token');
+
+      throw error;
+    }
+  }
+
+  async isTokenBlacklisted(jti: string): Promise<boolean> {
+    const startTime = Date.now();
+
+    logger.debug({
+      operation: 'check_token_blacklist',
+      jti
+    }, 'Checking if token is blacklisted');
+
+    try {
+      const key = `bl:${jti}`;
+      const exists = await this.redis.exists(key);
+      const isBlacklisted = exists === 1;
+
+      const processingTime = Date.now() - startTime;
+
+      logger.debug({
+        operation: 'check_token_blacklist_success',
+        jti,
+        isBlacklisted,
+        processingTime
+      }, 'Token blacklist check completed');
+
+      return isBlacklisted;
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+
+      logger.error({
+        operation: 'check_token_blacklist_failed',
+        jti,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        processingTime
+      }, 'Failed to check token blacklist');
+
+      throw error;
+    }
+  }
+
+  async findSessionsByUserId(userId: string): Promise<Session[]> {
+    const startTime = Date.now();
+
+    logger.debug({
+      operation: 'find_sessions_by_user_id',
+      userId
+    }, 'Finding all sessions for user');
+
+    try {
+      const keys = await this.redis.keys('session:*');
+      const sessions: Session[] = [];
+
+      for (const key of keys) {
+        const data = await this.redis.get(key);
+        if (data) {
+          const session = JSON.parse(data) as Session;
+          if (session.userId === userId) {
+            session.createdAt = new Date(session.createdAt);
+            session.expiresAt = new Date(session.expiresAt);
+            session.lastActivity = new Date(session.lastActivity);
+            sessions.push(session);
+          }
+        }
+      }
+
+      const processingTime = Date.now() - startTime;
+
+      logger.info({
+        operation: 'find_sessions_by_user_id_success',
+        userId,
+        sessionsFound: sessions.length,
+        processingTime
+      }, 'User sessions retrieved successfully');
+
+      return sessions;
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+
+      logger.error({
+        operation: 'find_sessions_by_user_id_failed',
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        processingTime
+      }, 'Failed to find sessions by user ID');
+
+      throw error;
+    }
+  }
 }
