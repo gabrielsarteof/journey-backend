@@ -69,14 +69,33 @@ const buildApp = async () => {
     },
   });
 
-  // Limite de requisições simples pra evitar flood — desativado em testes
+  // Rate limit por userId se autenticado, fallback para IP
+  // 300 req/min: balanceado entre UX (permite navegação normal) e proteção contra abuse
   if (config.NODE_ENV !== 'test') {
     await app.register(rateLimit, {
-      max: 100,
+      global: false,
+      max: 300,
       timeWindow: '1 minute',
+      redis: redis,
+      nameSpace: 'rate-limit:',
       keyGenerator: (request: FastifyRequest) => {
         const user = request.user as { id?: string } | undefined;
         return user?.id || request.ip;
+      },
+      addHeaders: {
+        'x-ratelimit-limit': true,
+        'x-ratelimit-remaining': true,
+        'x-ratelimit-reset': true,
+        'retry-after': true,
+      },
+      errorResponseBuilder: (request, context) => {
+        return {
+          success: false,
+          error: 'RATE_LIMIT_EXCEEDED',
+          message: `Muitas requisições. Tente novamente em ${Math.ceil(context.ttl / 1000)} segundos.`,
+          retryAfter: Math.ceil(context.ttl / 1000),
+          statusCode: 429,
+        };
       },
     });
   }
