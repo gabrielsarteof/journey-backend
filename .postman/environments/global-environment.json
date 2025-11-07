@@ -4,7 +4,7 @@
 	"values": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:3333/api",
+			"value": "http://localhost:8000/api",
 			"description": "Base URL for the API server",
 			"type": "default",
 			"enabled": true
@@ -146,6 +146,20 @@
 			"key": "unlockedBadgesCount",
 			"value": "",
 			"description": "Number of unlocked badges (automatically set)",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "firstModuleId",
+			"value": "",
+			"description": "First module ID for testing (automatically set)",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "firstModuleSlug",
+			"value": "",
+			"description": "First module slug for testing (automatically set)",
 			"type": "default",
 			"enabled": true
 		}

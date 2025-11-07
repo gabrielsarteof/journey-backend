@@ -225,6 +225,30 @@ if %errorlevel% equ 0 (
 )
 set /a TOTAL_TESTS+=1
 
+REM Run Modules Collection
+echo.
+echo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+echo Running: Modules System
+echo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+echo.
+
+newman run "%COLLECTIONS_DIR%\modules-collection.json" ^
+    -e "%ENV_FILE%" ^
+    --reporters cli,json,htmlextra ^
+    --reporter-json-export "%REPORTS_DIR%\%TIMESTAMP%\modules-report.json" ^
+    --reporter-htmlextra-export "%REPORTS_DIR%\%TIMESTAMP%\modules-report.html" ^
+    --reporter-htmlextra-title "Modules System" ^
+    --color on ^
+    --delay-request 100
+
+if %errorlevel% equ 0 (
+    echo [PASSED] Modules System
+) else (
+    echo [FAILED] Modules System
+    set /a FAILED_TESTS+=1
+)
+set /a TOTAL_TESTS+=1
+
 REM Generate summary
 echo.
 echo ╔════════════════════════════════════════════════════════════════╗
