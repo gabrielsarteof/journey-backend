@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting seed...');
 
+  // Limpar dados na ordem correta (respeitando foreign keys)
   await prisma.certificate.deleteMany();
   await prisma.xPTransaction.deleteMany();
   await prisma.userBadge.deleteMany();
@@ -16,7 +17,12 @@ async function main() {
   await prisma.challengeAttempt.deleteMany();
   await prisma.userMetrics.deleteMany();
   await prisma.badge.deleteMany();
+  await prisma.userLevelProgress.deleteMany();
+  await prisma.levelChallenge.deleteMany();
+  await prisma.level.deleteMany();
   await prisma.challenge.deleteMany();
+  await prisma.userUnitProgress.deleteMany();
+  await prisma.unit.deleteMany();
   await prisma.userModuleProgress.deleteMany();
   await prisma.module.deleteMany();
   await prisma.user.deleteMany();
@@ -976,6 +982,102 @@ const challenge28 = await prisma.challenge.create({
 });
 
 console.log('✅ Challenges created (28 total)');
+
+// UNITS E LEVELS - Estrutura de aprendizagem
+const unit1 = await prisma.unit.create({
+  data: {
+    slug: 'fundamentos-ia-responsavel',
+    title: 'Primeiros Passos com IA Responsável',
+    description: 'Aprenda os fundamentos de governança de IA e boas práticas no desenvolvimento com assistentes de código',
+    moduleId: backendModule.id,
+    orderInModule: 1,
+    iconImage: 'unit-basics.png',
+    theme: {
+      color: '#8b5cf6',
+      gradient: ['#8b5cf6', '#7c3aed'],
+      icon: '🎯',
+    },
+    learningObjectives: [
+      'Entender os riscos do uso inadequado de IA',
+      'Aprender a validar código gerado por IA',
+      'Conhecer as métricas DI, PR e CS',
+      'Desenvolver consciência sobre dependência de IA',
+    ],
+    estimatedMinutes: 120,
+    theoryContent: `
+# Governança de IA no Desenvolvimento
+
+## Introdução
+A inteligência artificial revolucionou o desenvolvimento de software, mas traz desafios importantes relacionados à qualidade, segurança e dependência excessiva.
+
+## Por que se importar?
+- **Segurança**: Código gerado pode conter vulnerabilidades
+- **Qualidade**: Nem sempre a solução mais rápida é a melhor
+- **Aprendizado**: Dependência excessiva prejudica o desenvolvimento de habilidades
+- **Responsabilidade**: O desenvolvedor é responsável pelo código, não a IA
+
+## Métricas de Governança
+- **DI (Dependency Index)**: Mede o quanto você depende da IA
+- **PR (Pass Rate)**: Taxa de aprovação nos testes
+- **CS (Checklist Score)**: Conformidade com boas práticas
+
+## Objetivo
+Usar a IA como ferramenta de produtividade, não como substituto do pensamento crítico.
+    `.trim(),
+    resources: {
+      articles: [
+        { title: 'AI Code Generation Best Practices', url: '#' },
+        { title: 'Security Risks in AI-Generated Code', url: '#' },
+      ],
+      videos: [
+        { title: 'Introdução à Governança de IA', duration: '15:00', url: '#' },
+      ],
+    },
+    requiredScore: 70,
+  },
+});
+
+// Level 0: LESSON (Tutorial interativo)
+const level0 = await prisma.level.create({
+  data: {
+    unitId: unit1.id,
+    orderInUnit: 0,
+    type: 'LESSON',
+    icon: '📚',
+    title: 'Tutorial: Validador Simples',
+    description: 'Aprenda criando um validador de email com IA responsável',
+    config: {
+      showTheoryFirst: true,
+      allowAI: true,
+      trackDI: true,
+      maxAIUsagePercent: 50,
+      tutorialSteps: [
+        { step: 1, instruction: 'Leia os requisitos do validador' },
+        { step: 2, instruction: 'Identifique os casos de teste necessários' },
+        { step: 3, instruction: 'Implemente a validação básica' },
+        { step: 4, instruction: 'Adicione tratamento de erros' },
+        { step: 5, instruction: 'Execute os testes e corrija problemas' },
+      ],
+    },
+    adaptive: false,
+    blocking: true,
+    optional: false,
+    timeLimit: null,
+    bonusXp: 25,
+  },
+});
+
+// Conectar o desafio ao level
+await prisma.levelChallenge.create({
+  data: {
+    levelId: level0.id,
+    challengeId: challenge1.id,
+    orderInLevel: 1,
+    required: true,
+  },
+});
+
+console.log('✅ Units and Levels created (1 unit, 1 level)');
 
 //  USER METRICS - Update to use challenge1 instead of apiChallenge
 await prisma.userMetrics.create({
