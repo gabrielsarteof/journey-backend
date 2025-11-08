@@ -709,7 +709,105 @@
 			]
 		},
 		{
-			"name": "✅ 5. Final Summary",
+			"name": "📚 5. Modules System",
+			"description": "Test module progression and learning path features",
+			"item": [
+				{
+					"name": "List Modules with Progress",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Modules listed successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains modules array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('success', true);",
+									"    pm.expect(responseJson.data).to.have.property('modules');",
+									"    pm.expect(responseJson.data.modules).to.be.an('array');",
+									"});",
+									"",
+									"// Store first module for later tests",
+									"const modules = pm.response.json().data.modules;",
+									"if (modules.length > 0) {",
+									"    const firstModule = modules[0];",
+									"    pm.environment.set('firstModuleId', firstModule.id);",
+									"    pm.environment.set('firstModuleSlug', firstModule.slug);",
+									"    console.log('✅ Stored module:', firstModule.slug);",
+									"}",
+									"",
+									"console.log('✅ Modules system tested successfully');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/modules",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules"]
+						},
+						"description": "List all modules with user progress"
+					}
+				},
+				{
+					"name": "Get Module Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Module details retrieved', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Module has required fields', function () {",
+									"    const module = pm.response.json().data.module;",
+									"    pm.expect(module).to.have.property('id');",
+									"    pm.expect(module).to.have.property('slug');",
+									"    pm.expect(module).to.have.property('title');",
+									"    pm.expect(module).to.have.property('description');",
+									"    pm.expect(module).to.have.property('theme');",
+									"    pm.expect(module).to.have.property('totalChallenges');",
+									"});",
+									"",
+									"console.log('✅ Module details retrieved');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/modules/{{firstModuleSlug}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules", "{{firstModuleSlug}}"]
+						},
+						"description": "Get detailed module information"
+					}
+				}
+			]
+		},
+		{
+			"name": "✅ 6. Final Summary",
 			"description": "Generate test execution summary",
 			"item": [
 				{

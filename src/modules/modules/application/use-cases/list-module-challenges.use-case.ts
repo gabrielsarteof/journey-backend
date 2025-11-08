@@ -19,7 +19,7 @@ export interface ChallengeWithStatusResult {
   category: string;
   estimatedMinutes: number;
   languages: string[];
-  planetImage: string | null;
+  assetId: string | null;
   visualTheme: any;
   baseXp: number;
   bonusXp: number;
@@ -110,7 +110,7 @@ export class ListModuleChallengesUseCase {
           category: challenge.category,
           estimatedMinutes: challenge.estimatedMinutes,
           languages: challenge.languages,
-          planetImage: challenge.planetImage,
+          assetId: challenge.assetId,
           visualTheme: challenge.visualTheme,
           baseXp: challenge.baseXp,
           bonusXp: challenge.bonusXp,

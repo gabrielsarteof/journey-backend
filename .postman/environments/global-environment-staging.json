@@ -134,6 +134,20 @@
 			"description": "Number of unlocked badges (automatically set)",
 			"type": "default",
 			"enabled": true
+		},
+		{
+			"key": "firstModuleId",
+			"value": "",
+			"description": "First module ID for testing (automatically set)",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "firstModuleSlug",
+			"value": "",
+			"description": "First module slug for testing (automatically set)",
+			"type": "default",
+			"enabled": true
 		}
 	],
 	"_postman_variable_scope": "environment",

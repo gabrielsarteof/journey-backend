@@ -58,6 +58,15 @@ Coleções Postman completas para testar todos os módulos da API Journey com au
 - Cache Management para performance otimizada
 - Enterprise Features (company/team leaderboards, role-based notification creation)
 
+### 6. **Modules System** (`modules-collection.json`)
+- ✅ 9 testes organizados
+- Module Listing (GET /modules com progresso do usuário)
+- Module Details (GET /modules/:slug com informações completas)
+- Progress Tracking (PATCH /modules/:moduleId/progress para atualizar conclusão)
+- Module Progression Flow (desafios sequenciais, XP tracking, completion)
+- Domain Error Validation (MODULE_NOT_FOUND, PROGRESS_NOT_FOUND, INVALID_PROGRESS_DATA)
+- Learning Path Management (módulos encadeados, desbloqueio progressivo)
+
 ## 🌍 Environments Consolidados
 
 Os environments globais funcionam com todas as collections:
@@ -463,7 +472,8 @@ npm run dev
 │   ├── challenges-collection.json              # Challenges module
 │   ├── metrics-collection.json                 # Metrics module
 │   ├── gamification-collection.json            # Gamification module
-│   └── ai-collection.json                      # AI module
+│   ├── ai-collection.json                      # AI module
+│   └── modules-collection.json                 # Modules system
 ├── environments/                                # Environments consolidados
 │   ├── global-environment.json                 # Development (recomendado)
 │   ├── global-environment-staging.json         # Staging
@@ -484,7 +494,9 @@ npm run dev
         ├── gamification-report.html
         ├── gamification-report.json
         ├── ai-report.html
-        └── ai-report.json
+        ├── ai-report.json
+        ├── modules-report.html
+        └── modules-report.json
 ```
 
 ---

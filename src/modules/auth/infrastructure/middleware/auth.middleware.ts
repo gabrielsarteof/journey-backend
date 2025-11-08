@@ -1,6 +1,7 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { JWTService } from '../services/jwt.service';
 import { UnauthorizedError, TokenInvalidError } from '../../domain/errors';
+import { IAuthRepository } from '../../domain/repositories/auth.repository.interface';
 
 declare module '@fastify/jwt' {
   interface FastifyJWT {
@@ -9,6 +10,7 @@ declare module '@fastify/jwt' {
       email: string;
       role: string;
       type: 'access' | 'refresh';
+      jti?: string;
     };
     user: {
       id: string;
@@ -19,7 +21,10 @@ declare module '@fastify/jwt' {
 }
 
 export class AuthMiddleware {
-  constructor(private readonly jwtService: JWTService) {}
+  constructor(
+    private readonly jwtService: JWTService,
+    private readonly authRepository: IAuthRepository
+  ) {}
 
   authenticate = async (
     request: FastifyRequest,
@@ -39,6 +44,15 @@ export class AuthMiddleware {
       if (payload.type !== 'access') {
         const error = new TokenInvalidError();
         return reply.status(error.statusCode).send(error.toJSON());
+      }
+
+      if (payload.jti) {
+        const isBlacklisted = await this.authRepository.isTokenBlacklisted(payload.jti);
+
+        if (isBlacklisted) {
+          const error = new TokenInvalidError('Token foi revogado');
+          return reply.status(error.statusCode).send(error.toJSON());
+        }
       }
 
       request.user = {

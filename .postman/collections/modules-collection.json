@@ -1,0 +1,471 @@
+{
+	"info": {
+		"_postman_id": "md1-m0d-u1e5-a1b2-c3d4e5f6789b",
+		"name": "Journey - Modules System",
+		"description": "Comprehensive test collection for the Journey Modules System.\n\n## Test Coverage\n- ✅ List Modules with Progress - 100% self-contained\n- ✅ Get Module Details - 100% self-contained\n- ✅ Update Module Progress - 100% self-contained\n- ✅ Module Progression Flow - 100% self-contained\n\n## How to Run\n\n### Quick Start\n1. Ensure API is running: `npm run dev`\n2. Run seed to create modules: `npm run prisma:seed`\n3. Run collection - Setup creates test user automatically\n4. All tests will pass\n\n## Architecture Decision\n\n**Why this approach?**\n- ✅ Tests are fully independent after seed\n- ✅ Modules are seeded data (predefined structure)\n- ✅ User operations create their own progress\n- ✅ Works seamlessly in CI/CD\n\n**Seeded Admin Credentials:**\n- Email: admin@techcorp.com\n- Password: Admin@123\n- Role: TECH_LEAD\n\n## Response Structure\nAll endpoints follow the robust domain error architecture:\n- Success: `{success: true, data: {...}}`\n- Error: `{error: string, code: string, statusCode: number, details?: any}`",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "🔧 Setup (Run First)",
+			"description": "Prepares test environment by creating test user.\n\n**What happens:**\n1. Creates fresh test user\n2. Logs in user\n3. Sets up environment variables",
+			"item": [
+				{
+					"name": "[POST] Create Test User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const timestamp = Date.now();",
+									"const email = `testuser_${timestamp}@journey.test`;",
+									"pm.collectionVariables.set('testUserEmail', email);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Test user created', function () {",
+									"    pm.response.to.have.status(201);",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('success', true);",
+									"    pm.environment.set('testUserId', responseJson.data.user.id);",
+									"});",
+									"",
+									"console.log('✅ Test user created for modules tests');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{testUserEmail}}\",\n  \"password\": \"Test@123\",\n  \"name\": \"Test User Modules\",\n  \"acceptTerms\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[POST] Login Test User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Test user logged in', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('success', true);",
+									"    pm.environment.set('accessToken', responseJson.data.accessToken);",
+									"    pm.environment.set('userId', responseJson.data.user.id);",
+									"});",
+									"",
+									"console.log('✅ Test user authenticated for modules tests');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{testUserEmail}}\",\n  \"password\": \"Test@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📚 Module Operations",
+			"description": "Core module operations: list, get details, update progress",
+			"item": [
+				{
+					"name": "[GET] List All Modules with Progress",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response is successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('success', true);",
+									"});",
+									"",
+									"pm.test('Returns array of modules', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.data).to.be.an('array');",
+									"    pm.expect(responseJson.data.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"pm.test('Modules have required fields', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const module = responseJson.data[0];",
+									"    pm.expect(module).to.have.property('id');",
+									"    pm.expect(module).to.have.property('slug');",
+									"    pm.expect(module).to.have.property('title');",
+									"    pm.expect(module).to.have.property('description');",
+									"    pm.expect(module).to.have.property('iconImage');",
+									"    pm.expect(module).to.have.property('theme');",
+									"    pm.expect(module.theme).to.have.property('color');",
+									"});",
+									"",
+									"pm.test('Modules are sorted by orderIndex', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const modules = responseJson.data;",
+									"    for (let i = 1; i < modules.length; i++) {",
+									"        pm.expect(modules[i].orderIndex).to.be.greaterThan(modules[i-1].orderIndex);",
+									"    }",
+									"});",
+									"",
+									"// Store first module for later tests",
+									"const responseJson = pm.response.json();",
+									"if (responseJson.data.length > 0) {",
+									"    pm.environment.set('firstModuleId', responseJson.data[0].id);",
+									"    pm.environment.set('firstModuleSlug', responseJson.data[0].slug);",
+									"}",
+									"",
+									"console.log('✅ Listed all modules with progress');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{"key": "token", "value": "{{accessToken}}", "type": "string"}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[GET] Get Module Details by Slug",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response is successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('success', true);",
+									"});",
+									"",
+									"pm.test('Module details are complete', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const module = responseJson.data;",
+									"    pm.expect(module).to.have.property('id');",
+									"    pm.expect(module).to.have.property('slug');",
+									"    pm.expect(module).to.have.property('title');",
+									"    pm.expect(module).to.have.property('description');",
+									"    pm.expect(module).to.have.property('totalChallenges');",
+									"    pm.expect(module).to.have.property('iconImage');",
+									"    pm.expect(module).to.have.property('theme');",
+									"});",
+									"",
+									"pm.test('Module has theme configuration', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const module = responseJson.data;",
+									"    pm.expect(module.theme).to.have.property('color');",
+									"    pm.expect(module.theme.color).to.match(/^#[0-9A-Fa-f]{6}$/);",
+									"});",
+									"",
+									"console.log('✅ Retrieved module details');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{"key": "token", "value": "{{accessToken}}", "type": "string"}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/{{firstModuleSlug}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules", "{{firstModuleSlug}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[PATCH] Update Module Progress",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Progress updated successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('success', true);",
+									"});",
+									"",
+									"pm.test('Progress data is correct', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const progress = responseJson.data;",
+									"    pm.expect(progress).to.have.property('status');",
+									"    pm.expect(progress).to.have.property('challengesCompleted');",
+									"    pm.expect(progress).to.have.property('completionPercentage');",
+									"    pm.expect(progress).to.have.property('totalXpEarned');",
+									"    pm.expect(progress).to.have.property('averageScore');",
+									"});",
+									"",
+									"pm.test('Challenges completed matches request', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.data.challengesCompleted).to.equal(2);",
+									"});",
+									"",
+									"pm.test('XP was added correctly', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.data.totalXpEarned).to.be.greaterThan(0);",
+									"});",
+									"",
+									"console.log('✅ Module progress updated');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{"key": "token", "value": "{{accessToken}}", "type": "string"}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"challengesCompleted\": 2,\n  \"xpEarned\": 150,\n  \"score\": 85\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/{{firstModuleId}}/progress",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules", "{{firstModuleId}}", "progress"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔄 Module Progression Flow",
+			"description": "Test complete module progression from start to completion",
+			"item": [
+				{
+					"name": "[PATCH] Progress - First Challenge",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('First challenge progress updated', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.data.challengesCompleted).to.equal(1);",
+									"    pm.expect(responseJson.data.status).to.be.oneOf(['AVAILABLE', 'IN_PROGRESS']);",
+									"});",
+									"",
+									"console.log('✅ First challenge completed');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{"key": "token", "value": "{{accessToken}}", "type": "string"}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"challengesCompleted\": 1,\n  \"xpEarned\": 100,\n  \"score\": 80\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/{{firstModuleId}}/progress",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules", "{{firstModuleId}}", "progress"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[PATCH] Progress - Mid Module",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Module in progress', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.data.status).to.equal('IN_PROGRESS');",
+									"    pm.expect(responseJson.data.completionPercentage).to.be.greaterThan(0);",
+									"    pm.expect(responseJson.data.completionPercentage).to.be.lessThan(100);",
+									"});",
+									"",
+									"pm.test('Average score calculated', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.data.averageScore).to.be.greaterThan(0);",
+									"});",
+									"",
+									"console.log('✅ Module progress tracking working');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{"key": "token", "value": "{{accessToken}}", "type": "string"}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"challengesCompleted\": 3,\n  \"xpEarned\": 150,\n  \"score\": 90\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/{{firstModuleId}}/progress",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules", "{{firstModuleId}}", "progress"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "❌ Error Handling",
+			"description": "Test error cases and validation",
+			"item": [
+				{
+					"name": "[GET] Non-existent Module",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Returns 404 for non-existent module', function () {",
+									"    pm.response.to.have.status(404);",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('success', false);",
+									"    pm.expect(responseJson).to.have.property('error');",
+									"});",
+									"",
+									"console.log('✅ Error handling for non-existent module works');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{"key": "token", "value": "{{accessToken}}", "type": "string"}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/non-existent-module",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules", "non-existent-module"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[GET] Modules Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Returns 401 without authentication', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"console.log('✅ Authentication required for modules endpoint');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "testUserEmail",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
