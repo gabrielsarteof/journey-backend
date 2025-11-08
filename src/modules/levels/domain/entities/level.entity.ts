@@ -22,19 +22,17 @@ export interface LevelProps {
 }
 
 /**
- * Entidade de domínio para Nível (Level)
- * Representa uma sessão individual de prática dentro de uma unidade
- *
- * Tipos de níveis (inspirado no Duolingo):
- * - LESSON: Lição guiada com teoria
- * - PRACTICE: Prática livre de desafios
- * - STORY: Narrativa interativa educacional
- * - UNIT_REVIEW: Teste final da unidade
- * - MATCH_MADNESS: Mini-game de pareamento
- * - RAPID_REVIEW: Quiz rápido
- * - XP_RAMP_UP: Desafio bônus de XP
- *
  * Padrão DDD: Entity com regras de negócio encapsuladas
+ *
+ * Level types focados em AI governance e segurança:
+ * - LESSON: guided theoretical lesson
+ * - PRACTICE: free practice challenges
+ * - UNIT_REVIEW: unit final test
+ * - CODE_REVIEW: analyze code for AI governance violations
+ * - SECURITY_AUDIT: identify AI security vulnerabilities
+ * - POLICY_CHECK: validate AI usage compliance
+ * - DEBUG_SECURITY: fix AI security issues
+ * - ADVANCED_CHALLENGE: complex multi-concept scenarios
  */
 export class LevelEntity {
   private constructor(private readonly props: LevelProps) {}
@@ -101,7 +99,6 @@ export class LevelEntity {
     });
   }
 
-  // Getters
   getId(): string {
     return this.props.id;
   }
@@ -154,24 +151,17 @@ export class LevelEntity {
     return this.props.bonusXp;
   }
 
-  /**
-   * Regra de negócio: Verifica se o nível tem limite de tempo
-   */
   hasTimeLimit(): boolean {
     return this.props.timeLimit !== null && this.props.timeLimit > 0;
   }
 
   /**
-   * Regra de negócio: Verifica se o nível é obrigatório para progressão
-   * Níveis blocking e não-optional bloqueiam progressão até serem completados
+   * Níveis blocking e não-optional bloqueiam progressão
    */
   isRequiredForProgression(): boolean {
     return this.props.blocking && !this.props.optional;
   }
 
-  /**
-   * Regra de negócio: Verifica se o nível oferece XP bônus
-   */
   hasBonusXp(): boolean {
     return this.props.bonusXp > 0;
   }
