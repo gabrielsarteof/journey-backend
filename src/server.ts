@@ -18,6 +18,8 @@ import metricPlugin from './modules/metrics/infrastructure/plugin/metric.plugin'
 import gamificationPlugin from './modules/gamification/infrastructure/plugin/gamification.plugin';
 import aiPlugin from './modules/ai/infrastructure/plugin/ai.plugin';
 import modulePlugin from './modules/modules/infrastructure/plugin/module.plugin';
+import unitPlugin from './modules/units/infrastructure/plugin/unit.plugin';
+import levelPlugin from './modules/levels/infrastructure/plugin/level.plugin';
 
 // Conexão com o banco e logs mais detalhados em dev
 const prisma = new PrismaClient({
@@ -110,7 +112,10 @@ const buildApp = async () => {
     await api.register(challengePlugin, { prisma, redis });
     await api.register(metricPlugin, { prisma, redis, wsServer: app.ws });
     await api.register(gamificationPlugin, { prisma, redis, wsServer: app.ws });
+    // Hierarquia de aprendizado: Modules → Units → Levels
     await api.register(modulePlugin, { prisma });
+    await api.register(unitPlugin, { prisma });
+    await api.register(levelPlugin, { prisma });
   }, { prefix: '/api' });
 
   // Endpoint simples pra saber se o servidor tá de pé
