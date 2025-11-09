@@ -1,0 +1,228 @@
+{
+	"info": {
+		"_postman_id": "un1t-5y5t-3m01-a1b2-c3d4e5f6789a",
+		"name": "Journey - Units System",
+		"description": "Test collection for the Journey Units System (learning hierarchy).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "🔧 Setup (Run First)",
+			"item": [
+				{
+					"name": "[POST] Create Test User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const timestamp = Date.now();",
+									"const email = `testuser_${timestamp}@journey.test`;",
+									"pm.collectionVariables.set('testUserEmail', email);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Test user created', function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set('testUserId', pm.response.json().data.user.id);",
+									"});",
+									"",
+									"console.log('✅ Test user created for units tests');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{testUserEmail}}\",\n  \"password\": \"Test@123\",\n  \"name\": \"Test User Units\",\n  \"acceptTerms\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "[POST] Login Test User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Test user logged in', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.environment.set('accessToken', pm.response.json().data.accessToken);",
+									"});",
+									"",
+									"console.log('✅ Test user authenticated for units tests');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{testUserEmail}}\",\n  \"password\": \"Test@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "[GET] Get First Module ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Got modules list', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data.length).to.be.greaterThan(0);",
+									"    pm.environment.set('testModuleId', data[0].id);",
+									"});",
+									"",
+									"console.log('✅ First module ID obtained');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📚 Unit Operations",
+			"item": [
+				{
+					"name": "[GET] List Units in Module",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response is successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.json()).to.have.property('success', true);",
+									"});",
+									"",
+									"pm.test('Returns array of units', function () {",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data).to.be.an('array');",
+									"    pm.expect(data.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"pm.test('Units have required fields', function () {",
+									"    const unit = pm.response.json().data[0];",
+									"    pm.expect(unit).to.have.property('id');",
+									"    pm.expect(unit).to.have.property('slug');",
+									"    pm.expect(unit).to.have.property('title');",
+									"    pm.expect(unit).to.have.property('moduleId');",
+									"    pm.expect(unit).to.have.property('orderInModule');",
+									"    pm.expect(unit).to.have.property('learningObjectives');",
+									"    pm.expect(unit.learningObjectives).to.be.an('array');",
+									"    pm.environment.set('testUnitId', unit.id);",
+									"});",
+									"",
+									"console.log('✅ Listed units in module');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/{{testModuleId}}/units",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules", "{{testModuleId}}", "units"]
+						}
+					}
+				},
+				{
+					"name": "[GET] Get Unit Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response is successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.json()).to.have.property('success', true);",
+									"});",
+									"",
+									"pm.test('Unit details are complete', function () {",
+									"    const unit = pm.response.json().data;",
+									"    pm.expect(unit).to.have.property('id');",
+									"    pm.expect(unit).to.have.property('theoryContent');",
+									"    pm.expect(unit).to.have.property('resources');",
+									"    pm.expect(unit).to.have.property('estimatedMinutes');",
+									"    pm.expect(unit).to.have.property('requiredScore');",
+									"});",
+									"",
+									"console.log('✅ Retrieved unit details');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/units/{{testUnitId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["units", "{{testUnitId}}"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "testUserEmail",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

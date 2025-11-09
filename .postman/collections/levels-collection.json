@@ -1,0 +1,246 @@
+{
+	"info": {
+		"_postman_id": "lv1-5y5t-3m02-a1b2-c3d4e5f6789b",
+		"name": "Journey - Levels System",
+		"description": "Test collection for the Journey Levels System (learning hierarchy).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "🔧 Setup (Run First)",
+			"item": [
+				{
+					"name": "[POST] Create Test User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const timestamp = Date.now();",
+									"const email = `testuser_${timestamp}@journey.test`;",
+									"pm.collectionVariables.set('testUserEmail', email);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Test user created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"console.log('✅ Test user created for levels tests');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{testUserEmail}}\",\n  \"password\": \"Test@123\",\n  \"name\": \"Test User Levels\",\n  \"acceptTerms\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "[POST] Login Test User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Test user logged in', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.environment.set('accessToken', pm.response.json().data.accessToken);",
+									"});",
+									"",
+									"console.log('✅ Test user authenticated for levels tests');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{testUserEmail}}\",\n  \"password\": \"Test@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "[GET] Get First Unit ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Got modules', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const moduleId = pm.response.json().data[0].id;",
+									"pm.environment.set('testModuleId', moduleId);",
+									"",
+									"pm.sendRequest({",
+									"    url: pm.environment.get('baseUrl') + '/modules/' + moduleId + '/units',",
+									"    method: 'GET',",
+									"    header: {",
+									"        'Authorization': 'Bearer ' + pm.environment.get('accessToken')",
+									"    }",
+									"}, function (err, res) {",
+									"    if (!err && res.json().data.length > 0) {",
+									"        pm.environment.set('testUnitId', res.json().data[0].id);",
+									"    }",
+									"});",
+									"",
+									"console.log('✅ First unit ID obtained');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🎮 Level Operations",
+			"item": [
+				{
+					"name": "[GET] List Levels in Unit",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response is successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.json()).to.have.property('success', true);",
+									"});",
+									"",
+									"pm.test('Returns array of levels', function () {",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data).to.be.an('array');",
+									"    pm.expect(data.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"pm.test('Levels have required fields', function () {",
+									"    const level = pm.response.json().data[0];",
+									"    pm.expect(level).to.have.property('id');",
+									"    pm.expect(level).to.have.property('type');",
+									"    pm.expect(level).to.have.property('icon');",
+									"    pm.expect(level).to.have.property('orderInUnit');",
+									"    pm.expect(level).to.have.property('challenges');",
+									"    pm.expect(level.challenges).to.be.an('array');",
+									"    pm.environment.set('testLevelId', level.id);",
+									"});",
+									"",
+									"pm.test('Level types are valid', function () {",
+									"    const level = pm.response.json().data[0];",
+									"    const validTypes = ['LESSON', 'PRACTICE', 'STORY', 'UNIT_REVIEW', 'MATCH_MADNESS', 'RAPID_REVIEW', 'XP_RAMP_UP'];",
+									"    pm.expect(validTypes).to.include(level.type);",
+									"});",
+									"",
+									"console.log('✅ Listed levels in unit');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/units/{{testUnitId}}/levels",
+							"host": ["{{baseUrl}}"],
+							"path": ["units", "{{testUnitId}}", "levels"]
+						}
+					}
+				},
+				{
+					"name": "[GET] Get Level Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response is successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.json()).to.have.property('success', true);",
+									"});",
+									"",
+									"pm.test('Level details are complete', function () {",
+									"    const level = pm.response.json().data;",
+									"    pm.expect(level).to.have.property('id');",
+									"    pm.expect(level).to.have.property('config');",
+									"    pm.expect(level).to.have.property('adaptive');",
+									"    pm.expect(level).to.have.property('blocking');",
+									"    pm.expect(level).to.have.property('optional');",
+									"    pm.expect(level).to.have.property('bonusXp');",
+									"    pm.expect(level).to.have.property('challenges');",
+									"});",
+									"",
+									"console.log('✅ Retrieved level details');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/levels/{{testLevelId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["levels", "{{testLevelId}}"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "testUserEmail",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
