@@ -148,6 +148,27 @@
 			"description": "First module slug for testing (automatically set)",
 			"type": "default",
 			"enabled": true
+		},
+		{
+			"key": "firstUnitId",
+			"value": "",
+			"description": "First unit ID for testing (automatically set)",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "testUnitId",
+			"value": "",
+			"description": "Unit ID for testing (automatically set)",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "testLevelId",
+			"value": "",
+			"description": "Level ID for testing (automatically set)",
+			"type": "default",
+			"enabled": true
 		}
 	],
 	"_postman_variable_scope": "environment",
