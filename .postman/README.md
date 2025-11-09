@@ -67,6 +67,22 @@ Coleções Postman completas para testar todos os módulos da API Journey com au
 - Domain Error Validation (MODULE_NOT_FOUND, PROGRESS_NOT_FOUND, INVALID_PROGRESS_DATA)
 - Learning Path Management (módulos encadeados, desbloqueio progressivo)
 
+### 7. **Units System** (`units-collection.json`)
+- ✅ Testes para hierarquia de aprendizado
+- Unit Listing (GET /modules/:moduleId/units)
+- Unit Details (GET /units/:unitId com teoria, objetivos, recursos)
+- Validação de learning objectives
+- Validação de estimated time e required score
+- Suporte a theoryContent e resources JSON
+
+### 8. **Levels System** (`levels-collection.json`)
+- ✅ Testes para níveis dentro das units
+- Level Listing (GET /units/:unitId/levels)
+- Level Details (GET /levels/:levelId com challenges associados)
+- Suporte a 7 tipos de level (LESSON, PRACTICE, STORY, UNIT_REVIEW, MATCH_MADNESS, RAPID_REVIEW, XP_RAMP_UP)
+- Validação de level configuration e adaptive behavior
+- Validação de blocking/optional levels
+
 ## 🌍 Environments Consolidados
 
 Os environments globais funcionam com todas as collections:
@@ -473,7 +489,9 @@ npm run dev
 │   ├── metrics-collection.json                 # Metrics module
 │   ├── gamification-collection.json            # Gamification module
 │   ├── ai-collection.json                      # AI module
-│   └── modules-collection.json                 # Modules system
+│   ├── modules-collection.json                 # Modules system
+│   ├── units-collection.json                   # Units system
+│   └── levels-collection.json                  # Levels system
 ├── environments/                                # Environments consolidados
 │   ├── global-environment.json                 # Development (recomendado)
 │   ├── global-environment-staging.json         # Staging
@@ -496,7 +514,11 @@ npm run dev
         ├── ai-report.html
         ├── ai-report.json
         ├── modules-report.html
-        └── modules-report.json
+        ├── modules-report.json
+        ├── units-report.html
+        ├── units-report.json
+        ├── levels-report.html
+        └── levels-report.json
 ```
 
 ---
