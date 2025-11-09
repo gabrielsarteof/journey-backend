@@ -18,6 +18,15 @@ export interface ModulePluginOptions {
   prisma: PrismaClient;
 }
 
+/**
+ * Module Plugin
+ *
+ * Responsabilidades:
+ * - Registrar rotas de módulos (/modules)
+ * - Fornecer unitController para rota /modules/:moduleId/units
+ *
+ * Nota: Units e Levels têm seus próprios plugins separados
+ */
 const modulePlugin: FastifyPluginAsync<ModulePluginOptions> = async function(
   fastify: FastifyInstance,
   options: ModulePluginOptions

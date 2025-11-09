@@ -77,4 +77,18 @@ export async function moduleRoutes(
     },
     handler: controller.updateModuleProgress as RouteHandlerMethod,
   });
+
+  fastify.get('/:moduleId/units', {
+    preHandler: [fastify.authenticate],
+    schema: {
+      params: {
+        type: 'object',
+        properties: {
+          moduleId: { type: 'string' },
+        },
+        required: ['moduleId'],
+      },
+    },
+    handler: unitController.listUnitsByModule as RouteHandlerMethod,
+  });
 }

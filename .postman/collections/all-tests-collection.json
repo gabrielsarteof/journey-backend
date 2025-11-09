@@ -807,7 +807,109 @@
 			]
 		},
 		{
-			"name": "✅ 6. Final Summary",
+			"name": "📖 6. Units System",
+			"description": "Test units within modules",
+			"item": [
+				{
+					"name": "List Units in Module",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Units listed successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains units array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('success', true);",
+									"    pm.expect(responseJson.data).to.be.an('array');",
+									"});",
+									"",
+									"const units = pm.response.json().data;",
+									"if (units.length > 0) {",
+									"    pm.environment.set('firstUnitId', units[0].id);",
+									"    console.log('✅ Stored unit:', units[0].slug);",
+									"}",
+									"",
+									"console.log('✅ Units system tested successfully');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/modules/{{firstModuleId}}/units",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules", "{{firstModuleId}}", "units"]
+						},
+						"description": "List all units in a module"
+					}
+				}
+			]
+		},
+		{
+			"name": "🎯 7. Levels System",
+			"description": "Test levels within units",
+			"item": [
+				{
+					"name": "List Levels in Unit",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Levels listed successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains levels array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('success', true);",
+									"    pm.expect(responseJson.data).to.be.an('array');",
+									"});",
+									"",
+									"const levels = pm.response.json().data;",
+									"if (levels.length > 0) {",
+									"    pm.expect(levels[0]).to.have.property('type');",
+									"    pm.expect(levels[0]).to.have.property('challenges');",
+									"}",
+									"",
+									"console.log('✅ Levels system tested successfully');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/units/{{firstUnitId}}/levels",
+							"host": ["{{baseUrl}}"],
+							"path": ["units", "{{firstUnitId}}", "levels"]
+						},
+						"description": "List all levels in a unit"
+					}
+				}
+			]
+		},
+		{
+			"name": "✅ 8. Final Summary",
 			"description": "Generate test execution summary",
 			"item": [
 				{

@@ -228,6 +228,52 @@
 					"response": []
 				},
 				{
+					"name": "[GET] List Units in Module",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response is successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.json()).to.have.property('success', true);",
+									"});",
+									"",
+									"pm.test('Returns array of units', function () {",
+									"    const data = pm.response.json().data;",
+									"    pm.expect(data).to.be.an('array');",
+									"    if (data.length > 0) {",
+									"        pm.expect(data[0]).to.have.property('id');",
+									"        pm.expect(data[0]).to.have.property('slug');",
+									"        pm.expect(data[0]).to.have.property('title');",
+									"        pm.expect(data[0]).to.have.property('learningObjectives');",
+									"    }",
+									"});",
+									"",
+									"console.log('✅ Listed units in module');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{"key": "token", "value": "{{accessToken}}", "type": "string"}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/{{firstModuleId}}/units",
+							"host": ["{{baseUrl}}"],
+							"path": ["modules", "{{firstModuleId}}", "units"]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "[PATCH] Update Module Progress",
 					"event": [
 						{

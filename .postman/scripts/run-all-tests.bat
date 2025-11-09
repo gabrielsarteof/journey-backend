@@ -249,6 +249,54 @@ if %errorlevel% equ 0 (
 )
 set /a TOTAL_TESTS+=1
 
+REM Run Units Collection
+echo.
+echo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+echo Running: Units System
+echo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+echo.
+
+newman run "%COLLECTIONS_DIR%\units-collection.json" ^
+    -e "%ENV_FILE%" ^
+    --reporters cli,json,htmlextra ^
+    --reporter-json-export "%REPORTS_DIR%\%TIMESTAMP%\units-report.json" ^
+    --reporter-htmlextra-export "%REPORTS_DIR%\%TIMESTAMP%\units-report.html" ^
+    --reporter-htmlextra-title "Units System" ^
+    --color on ^
+    --delay-request 100
+
+if %errorlevel% equ 0 (
+    echo [PASSED] Units System
+) else (
+    echo [FAILED] Units System
+    set /a FAILED_TESTS+=1
+)
+set /a TOTAL_TESTS+=1
+
+REM Run Levels Collection
+echo.
+echo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+echo Running: Levels System
+echo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+echo.
+
+newman run "%COLLECTIONS_DIR%\levels-collection.json" ^
+    -e "%ENV_FILE%" ^
+    --reporters cli,json,htmlextra ^
+    --reporter-json-export "%REPORTS_DIR%\%TIMESTAMP%\levels-report.json" ^
+    --reporter-htmlextra-export "%REPORTS_DIR%\%TIMESTAMP%\levels-report.html" ^
+    --reporter-htmlextra-title "Levels System" ^
+    --color on ^
+    --delay-request 100
+
+if %errorlevel% equ 0 (
+    echo [PASSED] Levels System
+) else (
+    echo [FAILED] Levels System
+    set /a FAILED_TESTS+=1
+)
+set /a TOTAL_TESTS+=1
+
 REM Generate summary
 echo.
 echo ╔════════════════════════════════════════════════════════════════╗
