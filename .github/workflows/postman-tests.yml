@@ -159,6 +159,26 @@ jobs:
             --reporter-json-export ./newman/modules-report.json \
             --color on
 
+      - name: 📖 Run Units System Tests
+        if: success() || failure()
+        run: |
+          newman run .postman/collections/units-collection.json \
+            -e .postman/environments/global-environment.json \
+            --env-var "baseUrl=http://localhost:3333/api" \
+            --reporters cli,json \
+            --reporter-json-export ./newman/units-report.json \
+            --color on
+
+      - name: 🎯 Run Levels System Tests
+        if: success() || failure()
+        run: |
+          newman run .postman/collections/levels-collection.json \
+            -e .postman/environments/global-environment.json \
+            --env-var "baseUrl=http://localhost:3333/api" \
+            --reporters cli,json \
+            --reporter-json-export ./newman/levels-report.json \
+            --color on
+
       - name: 📊 Upload Test Reports
         if: always()
         uses: actions/upload-artifact@v4
