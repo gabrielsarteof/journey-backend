@@ -1,0 +1,6 @@
+export enum UnitStatus {
+  LOCKED = 'LOCKED',
+  AVAILABLE = 'AVAILABLE',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+}

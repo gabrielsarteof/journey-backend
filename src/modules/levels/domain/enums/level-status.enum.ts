@@ -1,0 +1,7 @@
+export enum LevelStatus {
+  LOCKED = 'LOCKED',
+  AVAILABLE = 'AVAILABLE',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  PERFECT = 'PERFECT',
+}
