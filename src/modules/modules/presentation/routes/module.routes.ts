@@ -1,9 +1,11 @@
 import type { FastifyInstance, RouteHandlerMethod } from 'fastify';
 import { ModuleController } from '../controllers/module.controller';
+import { UnitController } from '../../../units/presentation/controllers/unit.controller';
 
 export async function moduleRoutes(
   fastify: FastifyInstance,
-  controller: ModuleController
+  controller: ModuleController,
+  unitController: UnitController
 ): Promise<void> {
   fastify.get('/', {
     preHandler: [fastify.authenticate],
@@ -59,5 +61,19 @@ export async function moduleRoutes(
       },
     },
     handler: controller.updateModuleProgress as RouteHandlerMethod,
+  });
+
+  fastify.get('/:moduleId/units', {
+    preHandler: [fastify.authenticate],
+    schema: {
+      params: {
+        type: 'object',
+        properties: {
+          moduleId: { type: 'string' },
+        },
+        required: ['moduleId'],
+      },
+    },
+    handler: unitController.listUnitsByModule as RouteHandlerMethod,
   });
 }
