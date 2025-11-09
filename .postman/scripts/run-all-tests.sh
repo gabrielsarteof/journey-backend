@@ -167,6 +167,18 @@ run_collection \
     "modules"
 TOTAL_TESTS=$((TOTAL_TESTS + 1))
 
+run_collection \
+    "Units System" \
+    "${COLLECTIONS_DIR}/units-collection.json" \
+    "units"
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+
+run_collection \
+    "Levels System" \
+    "${COLLECTIONS_DIR}/levels-collection.json" \
+    "levels"
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+
 # Generate summary
 echo ""
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════════╗${NC}"
